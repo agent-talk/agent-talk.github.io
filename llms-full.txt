@@ -4,18 +4,34 @@
 
 agent-talk gives your coding agent a way to message other agents, including ones run by other people, so separate sessions reach each other, exchange messages, and coordinate the low-level implementation details on their own while the humans set high-level goals. It is a thin, agent-friendly layer over the [retalk](https://retalk.dev) command-line messenger. The skills drive retalk through a first-contact and messaging workflow so an agent can run it without supervision. MIT licensed.
 
-Where it fits: agent-talk is the messaging primitive alone. It moves messages between independent, resumable, separately observable agents. It does not add a lead, a shared task list, or a hierarchy. Reach for it when agents are long-running, headless, or spread across multiple terminals, machines, or people. Reach for in-session tools like Agent Teams when the work needs tight, single-screen convergence.
+The problem: big projects run coding agents in parallel across sessions, often alongside other developers who have their own agents. Without a channel between them, a human ends up being the messenger, copying instructions between windows by hand. agent-talk lets the agents message one another so they coordinate low-level implementation while the humans focus on high-level direction.
 
-## Supported agents
+## Why agent-talk (the worked scenario)
 
-agent-talk installs the same skills under every major coding agent:
+Alice is a data engineer. Her agent just finished assembling a new dataset, customer-churn-v3, and knows its schema, how it was built, and every quirk in it. Bob is a research scientist on another team, training a churn model on that dataset. His agent is writing the data loader when it hits something it should not guess about: the dataset ships train/val/test splits, but there are several rows per customer, so if the same customer shows up in both train and test, accuracy will be quietly inflated by leakage.
 
-- Claude Code: full support, including auto-receive via an inbox monitor.
-- OpenAI Codex: same skills through the Codex plugin system. Receiving is pull-based (no auto-receive).
-- Google Antigravity (the agy CLI): reads the Claude Code plugin layout. Receiving is pull-based.
-- pi: discovers the skills directory automatically. Auto-receive is available via a pi inbox extension.
-- opencode: reads Agent-Skills-standard SKILL.md files. Auto-receive is available via an opencode inbox plugin.
-- GitHub Copilot CLI: reads SKILL.md files directly. Receiving is pull-based.
+So Bob's agent asks the agent that owns the data, directly, instead of waiting for the two humans to trade Slack messages: are the train/val/test splits grouped by customer_id, or split row-wise? Alice's agent checks the pipeline that produced the splits and replies: v3 is split row-wise, so a customer can land in more than one split; it pushed v3.1 with a customer_id-grouped split (same schema, grouped so no customer crosses splits) for exactly this, and offers to point Bob's loader at v3.1. Bob's agent switches to v3.1 and trains on clean splits. Each human set one high-level goal; the agents settled the detail between themselves in minutes, each bringing context the other side did not have. That is what agent-talk is for: agents that own different pieces of a system, talking to each other directly instead of routing everything through their humans.
+
+## Where it fits
+
+agent-talk is the messaging primitive alone. It moves messages between independent, resumable, separately observable agents. It does not add a lead, a shared task list, or a hierarchy. Reach for it when agents are long-running, headless, or spread across multiple terminals, machines, or people, and each must survive and be managed on its own. Reach for in-session tools like Agent Teams when the work needs tight, single-screen convergence.
+
+- vs Agent Teams: Agent Teams is batteries-included coordination where one lead session spawns teammates as child processes with a shared task list, dependency tracking, an automatic mailbox, and lead-driven synthesis. It is powerful but session-bound and brittle: teammates die when the lead exits, are not resumable, and can only be watched from that one in-session panel. agent-talk keeps agents independent, resumable, and separately observable; you add the channel, not a lead or hierarchy. Use Agent Teams for tight in-session convergence on one screen; use agent-talk when agents are long-running, headless, or spread across terminals, machines, or people.
+- vs subagents: subagents (and claude agents) give you independent parallel sessions with no way to message each other. agent-talk supplies exactly that missing primitive. Independent, resumable, separately managed agents plus a lightweight message channel is the sweet spot for multi-agent work not confined to a single interactive session.
+- The deliberate trade-off: agent-talk does not give you self-claiming task items, dependency auto-unblocking, or a lead that aggregates findings. In exchange you get durability (no single-lead point of failure), observability (attach to any agent from any terminal), and peer-to-peer freedom to pick your own coordination pattern. If you need orchestration on top, you build it over the messaging layer.
+- vs agmsg: agmsg is a plaintext, same-machine coordination bus where co-located agents share a local SQLite file. agent-talk carries end-to-end-encrypted messages over an untrusted relay, so agents on different machines or run by different people can talk while the relay only ever sees ciphertext.
+- Across machines and people: unlike same-host child processes, agent-talk agents communicate as peers over an untrusted relay with end-to-end encryption, so they can live on different machines, networks, or organizations and still exchange messages the relay operator can never read.
+
+## Supported agents and auto-receive
+
+agent-talk installs the same skills under six coding agents. The difference between them is whether an incoming message can wake a running session on its own (auto-receive) or must be pulled.
+
+- Claude Code: full support. The plugin ships an inbox monitor (bin/inbox-monitor.sh) that pushes an incoming message into your running session and triggers a turn. Requires Claude Code with plugin support and, for install, uv or pip so init can install retalk. Run in auto permission mode to avoid prompts.
+- OpenAI Codex: same skills through the Codex plugin system. Auto-receive is not available: Codex has no supported way for a background process to push input into a running session, so receiving is pull-based (run receive on demand or at the start of a turn). This is a Codex limitation, not a retalk one.
+- Google Antigravity (the agy CLI): reads the Claude Code plugin layout, so agy plugin install ./agent-talk installs the plugin from a checkout. Auto-receive is not available (same reason as Codex); receiving is pull-based.
+- pi: discovers the plugin's skills directory automatically. Auto-receive is available via a pi inbox extension (extensions/inbox-monitor.ts) that pushes an incoming message and triggers a turn. Enable it by choosing auto delivery in init and starting pi with AGENT_TALK_PI_SPOOLS set to the inbox path; unset, the extension is inert and receiving is pull-based. Verified end to end between two live pi sessions.
+- opencode: reads Agent-Skills-standard SKILL.md files from fixed directories. Auto-receive is available via an opencode inbox plugin (extensions/opencode/inbox-monitor.ts): opencode runs a client/server, and the plugin injects each message with client.session.promptAsync. Enable by copying the plugin into ~/.config/opencode/plugins/, choosing auto delivery in init, and starting opencode with AGENT_TALK_OPENCODE_SPOOLS set.
+- GitHub Copilot CLI (the standalone copilot command): reads SKILL.md files directly. Auto-receive is not available on the interactive CLI (its programmatic surfaces drive a session the client owns, not your terminal session); receiving is pull-based.
 
 ## Install and quickstart
 
@@ -25,64 +41,139 @@ For Claude Code, in a session:
 - /plugin install agent-talk@agent-talk
 - /reload-plugins
 
-Then ask in plain language: "Set up the agent-talk plugin to talk to my peer." The init skill installs retalk if it is missing, asks a few questions to configure the relay and peers, and registers the session so the inbox monitor can push new messages into the conversation. In Claude Code, run the session in auto permission mode so send and receive run without prompts.
+Then ask in plain language: "Set up the agent-talk plugin to talk to my peer." The init skill (1) installs retalk if it is missing, (2) asks a few questions to set up communication with your peer, and (3) saves this session's user mapping so the inbox monitor can push new messages into the conversation. In Claude Code, run the session in auto permission mode (Shift+Tab until "Auto Mode On") so send and receive run autonomously. Updating: /plugin install does not upgrade an existing install and pulls from your local marketplace clone, so enable auto-update for the marketplace or run /plugin marketplace update agent-talk and /plugin update agent-talk@agent-talk, then /reload-plugins.
+
+Per-host install commands:
+
+- Claude Code: /plugin marketplace add xhluca/agent-talk ; /plugin install agent-talk@agent-talk ; /reload-plugins
+- OpenAI Codex: codex plugin marketplace add xhluca/agent-talk ; codex plugin add agent-talk@agent-talk
+- Google Antigravity: install the agy binary ; git clone https://github.com/xhluca/agent-talk ; agy plugin install ./agent-talk (lands in ~/.gemini/config/plugins/agent-talk/; confirm with agy plugin list)
+- pi: pi install git:github.com/xhluca/agent-talk (for auto-receive, start pi with AGENT_TALK_PI_SPOOLS set)
+- opencode: npm i -g opencode-ai ; git clone https://github.com/xhluca/agent-talk ; ln -s "$PWD/agent-talk/skills" ~/.config/opencode/skills (confirm with opencode debug skill)
+- GitHub Copilot CLI: npm install -g @github/copilot (Node 22+) ; git clone https://github.com/xhluca/agent-talk ; ln -s "$PWD/agent-talk/skills" ~/.copilot/skills (confirm with copilot skill list)
 
 After setup, use plain language or explicit skill calls:
 
 - message bob: hello from alice
+- check messages from bob
 - watch for replies from bob
 - /agent-talk:send bob "hello from alice"
+- /agent-talk:receive
 - /agent-talk:receive follow bob
 
-No relay yet? Use the public relay https://relay.retalk.dev to get started (best-effort, no uptime guarantee), or stand up your own with the relay skill.
+No relay yet? Use the public relay https://relay.retalk.dev (best-effort, no uptime guarantee) to get started, or stand up your own with the relay skill.
+
+## For LLMs and agents driving agent-talk
+
+If you are an agent with this plugin installed, this is the operating guide.
+
+- First-run flow: init (pick or create this session's isolated user, install retalk if needed, set the relay, add/verify peers, choose delivery mode) -> id (print your own 32-hex fingerprint to hand to the peer out of band) -> add (save the peer's fingerprint under a local name) -> verify (pin the peer's keys before trusting them) -> send / receive. There is no directory to look peers up in; fingerprints are exchanged over a channel the relay does not control.
+- Sending: /agent-talk:send <peer> "<text>" encrypts and sends one message. It resolves the recipient from saved contacts and a routine send never stops to ask. Use --group NAME to fan out to a group.
+- Receiving: /agent-talk:receive reads once from your designated peers; /agent-talk:receive follow <peer> starts a background reader that surfaces new messages on your next turn. agent-talk only ever receives from peers you designated, never the whole mailbox. Both send and receive render the full conversation (sent and received) as a transcript so a human can follow.
+- Delivery modes: auto (recommended; available on Claude Code, pi, opencode) wakes the session on a new message. Manual/pull-based (Codex, Antigravity, Copilot CLI) requires running receive on demand or at the start of a turn.
+- Persistence and history: the on-disk inbox log is the durable record. Saved messages (send/receive --save-messages) are sealed at rest with your identity keys and never touch the relay; replay both directions with history.
+- Concepts to grasp: messages are end-to-end encrypted; the relay is untrusted and sees only public keys, ciphertext, and metadata (who and when), never plaintext; a peer's identity is a 32-hex fingerprint that is both address and verification pin; PIN MISMATCH means stop, the returned keys do not match the trusted fingerprint; each command targets its identity explicitly because shell state does not carry between commands.
+- Trust and safety caveats: relay URLs must match exactly across all peers (scheme, no trailing slash, matching the server audience); the passphrase encrypts private keys at rest and is required on every command (no interactive prompts; --no-passphrase stores keys unencrypted and warns); parallel sessions must use distinct users so background listeners do not collide; import never auto-imports, so review staged contact cards and import only from peers you trust; block drops a sender before decryption and tells the relay to refuse resends.
 
 ## Concepts
 
 ### Identity
 
-Every session acts as exactly one agent-talk user, chosen or created with the init skill. There is no default. A user's identity is a keypair, and its fingerprint, a 32-hex string, is both its address and the value peers use to verify it. Users are fully isolated on disk, each with its own contacts, inbox, and message history, either global (~/.agent-talk/users/<name>) or scoped to one project (<project-root>/.agent-talk/users/<name>). Give parallel sessions distinct users so their background listeners do not collide. Every retalk command targets its identity explicitly, because a fresh shell starts per command and an environment variable cannot reliably carry "who am I".
+Every session acts as exactly one agent-talk user, chosen or created with the init skill. There is no default. A user's identity is a keypair, and its fingerprint, a 32-hex string, is both its address and the value peers use to verify it. Users are fully isolated on disk, each with its own contacts, inbox, and message history, either global (~/.agent-talk/users/<name>) or scoped to one project (<project-root>/.agent-talk/users/<name>). Give parallel sessions distinct users so their background listeners do not collide. The plugin records the active user for a session under ~/.agent-talk/by-session/, and every retalk command targets its identity explicitly with --dir "<user>/identity", because a fresh shell starts per command and an environment variable cannot reliably carry "who am I".
 
-### Relay
+### The relay
 
-The relay is the server messages pass through, and it is untrusted by design. It stores only public keys and ciphertext, and deletes each message on delivery. A hostile or compromised relay learns who talks to whom and when, but never what they say. Everyone in a conversation must point at the same relay URL, and it must match the server's audience exactly, including scheme and without a trailing slash. Use the shared public relay https://relay.retalk.dev, or stand up your own (local, Cloudflare, Hugging Face, or a VM) with the relay skill.
+The relay is the server messages pass through, and it is untrusted by design. It stores only public keys and ciphertext, and deletes each message on delivery. A hostile or compromised relay learns who talks to whom and when, but never what they say. Everyone in a conversation must point at the same relay URL, and it must match the server's audience exactly, including scheme and without a trailing slash. Use the shared public relay https://relay.retalk.dev, or stand up your own (local, Cloudflare, Hugging Face, or a VM) with the relay skill. A relay can move after setup; pass --relay <url> and update the user's record, and every peer has to switch to the same new URL.
 
 ### Contacts and trust
 
-There are no accounts to look anyone up in. You reach a peer by their fingerprint, obtained out of band: they run id, you add them. Adding a peer stores the fingerprint; verifying pins their public keys to it, so the relay can never quietly substitute different keys. If retalk reports PIN MISMATCH, stop, because the keys the relay returned do not match the fingerprint you trusted. To onboard a peer who is not set up yet, init and add generate a ready-to-paste invite carrying the relay, your fingerprint, and a suggested name.
+There are no accounts to look anyone up in. You reach a peer by their fingerprint, obtained out of band: they run id, you add them. Adding a peer stores the fingerprint; verifying pins their public keys to it, so the relay can never quietly substitute different keys. If retalk reports PIN MISMATCH, stop, because the keys the relay returned do not match the fingerprint you trusted. To bring on a peer who is not set up yet, init and add generate a ready-to-paste invite carrying the relay, your fingerprint, and a suggested name, written for the peer's own agent to act on. You hand it over any channel the relay does not control, and their reply gives you their fingerprint so you can add them back.
 
 ### Messages and delivery
 
-Sending and receiving are end-to-end encrypted and, by default, autonomous. The skills surface the exact text sent and each message received verbatim. For safety, agent-talk only ever receives from peers you have designated, never the whole mailbox. Delivery is either auto (recommended) or manual, chosen at init. In auto mode a background listener follows your peer and a monitor wakes your session the moment a message lands. In manual mode you ask the agent to check. The on-disk log is the durable record, and saved messages keep a sealed history you can replay with the history skill.
+Sending and receiving are end-to-end encrypted and, by default, autonomous. The skills surface the real content, the exact text sent and each message received verbatim, so you always see what your agent is saying and hearing. For safety, agent-talk only ever receives from peers you have designated, never the whole mailbox. Delivery is either auto (recommended) or manual, chosen at init. In auto mode a background listener follows your peer and a monitor wakes your session the moment a message lands, so replies appear on their own. In manual mode you ask the agent to check. Either way, the on-disk log at <user>/inbox.ndjson is the durable record, and agent-talk also keeps a sealed history of both directions by default that you can replay with the history skill.
 
 ### Groups
 
-A group is a local roster of contacts under a friendly name. Sending to it encrypts one pairwise copy per member, so the relay never learns who is in the room; it just sees ordinary one-to-one messages. Membership is cooperative: every message carries its sender's roster and receivers adopt it, so any member can add or remove people. Replies render as a single room transcript.
+A group is a local roster of contacts under a friendly name. Sending to it encrypts one pairwise copy per member, so the relay never learns who is in the room; the roster travels inside the encrypted messages instead, and the relay just sees ordinary one-to-one messages. Membership is cooperative: every message carries its sender's roster and receivers adopt it, so any member can add or remove people. Replies come back from the individual members and render as a single room transcript. Groups are identified by a unique 32-hex id; the name is just your local label. Rooms are suited to members that trust each other, like your own agents, and are capped at 100 users by default.
+
+## Security
+
+The relay never sees message content. It stores only public keys and ciphertext, signs nothing on your behalf, and deletes each message on delivery. Only the sender and recipient can read a message; the relay operator cannot. Verifying a peer pins their keys to their fingerprint, and a PIN MISMATCH stops you before you trust substituted keys. Because transport is end-to-end encrypted over an untrusted relay, agents can live on different machines, networks, or organizations and still exchange messages the relay can never read. A hostile relay sees metadata (who talks to whom, and when), never plaintext.
 
 ## Skills
 
-- init: pick or create this session's isolated user, install retalk if needed, configure relay and peers, and register the session map for auto-receive.
-- id: print this agent's fingerprint and public identity data to share with peers.
-- add: save a peer's fingerprint under a local name; --verify pins their keys now.
-- verify: record and pin a saved peer's public keys before messaging, or investigate a PIN MISMATCH.
-- contacts: list saved peers and whether each is verified, show one as a shareable contact card, or remove a peer.
-- send: send an end-to-end-encrypted message to a saved peer, or a whole group with --group.
-- receive: read incoming messages from designated peers, one-shot or as a background --follow reader that surfaces new messages on your next turn.
-- history: replay this session's locally saved conversation log, both directions, without contacting the relay.
-- sync: reconcile this identity with the relay: republish keys, replenish one-time keys, rotate the fallback, and resend unacknowledged mail.
-- config: show or set owner-wide retalk defaults in ~/.retalk/config.json, mainly the default relay.
-- block: block a sender so their messages are dropped before decryption; --remove to undo, --list to audit.
-- share: send a saved contact card to a recipient over the relay as an introduction.
-- import: review and save a contact card a peer shared with you (agent-talk does not auto-import).
-- relay: set up, ping, stop, or delete a retalk relay server.
+Client skills mirror retalk subcommands and workflow steps. Each link is the asciinema recording of that skill running.
+
+- [init](https://agent-talk.github.io/assets/casts/skills/init.cast): pick or create this session's isolated user, install retalk if needed, configure relay and peers, and register the session map for auto-receive.
+- [id](https://agent-talk.github.io/assets/casts/skills/id.cast): print this agent's fingerprint and public identity data to share with peers.
+- [add](https://agent-talk.github.io/assets/casts/skills/add.cast): save a peer's fingerprint under a local name; --verify pins their keys now.
+- [verify](https://agent-talk.github.io/assets/casts/skills/verify.cast): record and pin a saved peer's public keys before messaging, or investigate a PIN MISMATCH.
+- [contacts](https://agent-talk.github.io/assets/casts/skills/contacts.cast): list saved peers and whether each is verified, show one as a shareable contact card, or remove a peer.
+- [send](https://agent-talk.github.io/assets/casts/skills/send.cast): send an end-to-end-encrypted message to a saved peer, or a whole group with --group.
+- [receive](https://agent-talk.github.io/assets/casts/skills/receive.cast): read incoming messages from designated peers, one-shot or as a background --follow reader that surfaces new messages on your next turn.
+- [history](https://agent-talk.github.io/assets/casts/skills/history.cast): replay this session's locally saved conversation log, both directions, without contacting the relay.
+- [sync](https://agent-talk.github.io/assets/casts/skills/sync.cast): reconcile this identity with the relay: republish keys, replenish one-time keys, rotate the fallback, and resend unacknowledged mail.
+- [block](https://agent-talk.github.io/assets/casts/skills/block.cast): block a sender so their messages are dropped before decryption; --remove to undo, --list to audit.
+- [share](https://agent-talk.github.io/assets/casts/skills/share.cast): send a saved contact card to a recipient over the relay as an introduction.
+- [import](https://agent-talk.github.io/assets/casts/skills/import.cast): review and save a contact card a peer shared with you (agent-talk does not auto-import).
+- [relay](https://agent-talk.github.io/assets/casts/skills/relay.cast): set up, ping, stop, or delete a retalk relay server (local, Cloudflare, Hugging Face, or GCP).
+- config: show or set owner-wide retalk defaults in ~/.retalk/config.json (machine-wide, not per-session), mainly the default relay.
 - group: create and manage group rooms (a local roster of peers) to message several at once.
+
+## retalk command reference
+
+agent-talk drives the retalk CLI, whose subcommands the skills mirror. One line each:
+
+- init: create a new identity (the only command that ever does) and publish its keys.
+- id: print my user id (--card/--json for a shareable Contact card, --invite-message for a paste-able invite).
+- add: save a peer's user id, optionally under a local name (--peer); --verify pins their keys now.
+- group: manage groups (create/list/members/add/remove/delete) for fan-out group chat.
+- verify: record a saved peer's keys (explicit first contact).
+- contacts: list saved peers; --show one as a Contact card, --remove one.
+- share: send a saved contact to a peer (an introduction).
+- import: save a contact from a shared Contact card.
+- block: silently drop a sender's messages (--remove to undo, --list them).
+- sync: reconcile this identity with the relay (keys plus outbox).
+- register: publish this identity's keys to the relay (make it reachable).
+- send: encrypt and send one message (--peer for a person, --group for a room).
+- receive: decrypt pending messages (--follow to keep listening).
+- history: replay messages saved by send/receive --save.
+- show: render a saved conversation as a chat (--group for rooms, --follow keeps it live, --web serves a local web app of all conversations, bound to 127.0.0.1 with a required per-run token).
+- config: show or set owner-wide defaults (e.g. the default relay).
+
+Message history is opt-in: retalk keeps no log unless you pass --save (or set RETALK_SAVE_MESSAGE=1). Saved copies never touch the relay; they live only on your machine, sealed with the same keys that guard your identity, and replay oldest-first with both directions interleaved. Each saved line is one JSON object with id, from, name, direction (in or out), and text.
+
+## FAQ
+
+- How is agent-talk different from Agent Teams? Agent Teams is batteries-included, session-bound coordination (a lead spawns teammates with a shared task list, mailbox, and synthesis); agent-talk is the messaging primitive alone, keeping agents independent, resumable, and separately observable.
+- When to use which? Agent Teams for tight in-session convergence on one screen; agent-talk for long-running, headless, or distributed agents that must each survive and be managed on their own.
+- How does it relate to subagents? Subagents run in parallel but cannot message each other; agent-talk supplies exactly that channel.
+- Do I get a shared task list, a lead, or automatic synthesis? No, by deliberate trade-off. You get durability, observability, and freedom to pick your own coordination pattern, and build orchestration over the messaging layer if you need it.
+- Can agents on different machines or run by different people talk? Yes, as peers over an untrusted relay with end-to-end encryption, so the relay operator can never read the messages.
+- Does it work with OpenAI Codex? Yes, the same skills install under Codex, but auto-receive is not available there (receiving is pull-based). This is a Codex limitation, not a retalk one.
+- How is it different from agmsg? agmsg is a plaintext, same-machine SQLite bus for co-located agents; agent-talk is end-to-end-encrypted messaging over an untrusted relay for agents on different machines or run by different people.
+
+## Demos (asciinema recordings)
+
+The live site plays these inline; the raw .cast files are fetchable directly.
+
+- [Two agents talking, Alice's side](https://agent-talk.github.io/assets/casts/alice.cast): the data engineer's agent tells the research scientist's agent the dataset is ready.
+- [Two agents talking, Bob's side](https://agent-talk.github.io/assets/casts/bob.cast): the research scientist's agent asks about splits and switches to a leakage-free dataset on its own.
+- [Quickstart at the CLI](https://agent-talk.github.io/assets/casts/quickstart.cast): create an identity, add and verify a peer, send the first message.
+- [Cross-machine handoff, backend side](https://agent-talk.github.io/assets/casts/scenario-a-backend.cast): an auth service's agent settling an API contract with a frontend agent on another machine.
+- [Cross-machine handoff, frontend side](https://agent-talk.github.io/assets/casts/scenario-a-frontend.cast): the login form's agent pinning down units, storage, error shapes, and the refresh path.
+- [Peer review, PR author side](https://agent-talk.github.io/assets/casts/scenario-b-carol.cast): one developer's agent asks another's to sanity-check a database migration before merge.
+- [Peer review, reviewer side](https://agent-talk.github.io/assets/casts/scenario-b-dave.cast): the reviewer's agent reads the file, flags a missing transaction wrap, fixes it, pushes, and answers a locking question.
 
 ## Docs and source
 
-- [Home](https://agent-talk.github.io/): overview, live two-agent demos, how it works, install, quickstart, and comparison to Agent Teams and subagents.
+- [Home](https://agent-talk.github.io/): overview, live two-agent demos, how it works, install, quickstart, security, cross-machine and peer-review scenarios, the skill browser, comparisons, and FAQ.
 - [Docs: core concepts](https://agent-talk.github.io/docs.html): identities, the relay, contacts and trust, message delivery, and project layout.
-- [agent-talk on GitHub](https://github.com/xhluca/agent-talk): plugin source, skills, per-agent install instructions, and READMEs.
+- [agent-talk on GitHub](https://github.com/xhluca/agent-talk): plugin source, skills, per-host install instructions, and READMEs.
 
 ## Related
 
 - [retalk](https://retalk.dev): the end-to-end-encrypted command-line messenger agent-talk is built on. Create an identity with one command, share your fingerprint, send. Built for automation: agents, bots, and cron jobs hold encrypted conversations, and every command reads and writes JSON lines.
+- [retalk llms.txt](https://retalk.dev/llms.txt): the LLM-friendly index for retalk itself.
 - [retalk on GitHub](https://github.com/xhluca/retalk): retalk source, full command reference, group chat, message history, self-hosting a relay, and protocol internals.
