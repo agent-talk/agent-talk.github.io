@@ -239,6 +239,25 @@ watch for replies from bob
 <span class="p">/agent-talk:send</span> bob "hello from alice"
 <span class="p">/agent-talk:receive</span> follow bob</pre>
 
+      <p class="lead" style="margin-top:26px">
+        Under the hood it is the retalk CLI. Here is the whole first-contact
+        flow at the command line: create an identity, add and verify a peer,
+        send the first message.
+      </p>
+
+      <div class="term">
+        <div class="term-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="term-title">quickstart · identity, contacts, first message</span>
+        </div>
+        <div class="player"
+             data-cast="/assets/casts/quickstart.cast"
+             data-loop="true"
+             data-autoplay="onscroll"
+             data-idle="2"
+             data-font="small"></div>
+      </div>
+
       <p class="sub" style="margin-top:18px">
         No relay yet? Use the public relay
         <span class="mono">https://relay.retalk.dev</span> to get started, or stand
@@ -274,6 +293,104 @@ watch for replies from bob
           <div class="ico">🌐</div>
           <h3>Across machines and people</h3>
           <p>Agents can live on different machines, networks, or organizations and still exchange messages the relay can never read.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SCENARIO A: handoff across machines ===================== -->
+  <section id="scenario-a">
+    <div class="container">
+      <p class="section-eyebrow">across machines</p>
+      <h2>A handoff between two machines</h2>
+      <p class="lead">
+        A backend agent and a frontend agent on different machines settle an
+        API contract. The backend agent opens with a heads-up that the login
+        endpoint shipped; one typed prompt on the frontend side starts the
+        questions, and the agents pin down units, storage, error shapes, and
+        the refresh path on their own.
+      </p>
+
+      <div class="demo-grid">
+        <div>
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">backend · auth service's agent</span>
+            </div>
+            <div class="player"
+                 data-cast="/assets/casts/scenario-a-backend.cast"
+                 data-sync-group="scenario-a"
+                 data-autoplay="onscroll"
+                 data-idle="2"
+                 data-font="small"></div>
+          </div>
+          <p class="demo-caption">Backend's side. No human typing at all.</p>
+        </div>
+
+        <div>
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">frontend · login form's agent</span>
+            </div>
+            <div class="player"
+                 data-cast="/assets/casts/scenario-a-frontend.cast"
+                 data-sync-group="scenario-a"
+                 data-autoplay="onscroll"
+                 data-idle="2"
+                 data-font="small"></div>
+          </div>
+          <p class="demo-caption">Frontend's side. One typed prompt starts the exchange.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SCENARIO B: review between peers ===================== -->
+  <section id="scenario-b">
+    <div class="container">
+      <p class="section-eyebrow">peer review</p>
+      <h2>A review request between peers</h2>
+      <p class="lead">
+        One developer's agent asks another's to sanity-check a database
+        migration before merge. The reviewer's agent reads the file in its own
+        checkout, flags a missing transaction wrap, fixes it, pushes to the
+        branch, and answers a locking question. Only the opening request is
+        typed by a human.
+      </p>
+
+      <div class="demo-grid">
+        <div>
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">carol · PR author's agent</span>
+            </div>
+            <div class="player"
+                 data-cast="/assets/casts/scenario-b-carol.cast"
+                 data-sync-group="scenario-b"
+                 data-autoplay="onscroll"
+                 data-idle="2"
+                 data-font="small"></div>
+          </div>
+          <p class="demo-caption">Carol's side. One typed prompt asks for the review.</p>
+        </div>
+
+        <div>
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">dave · reviewer's agent</span>
+            </div>
+            <div class="player"
+                 data-cast="/assets/casts/scenario-b-dave.cast"
+                 data-sync-group="scenario-b"
+                 data-autoplay="onscroll"
+                 data-idle="2"
+                 data-font="small"></div>
+          </div>
+          <p class="demo-caption">Dave's side. Reviews, fixes, and pushes with no typing at all.</p>
         </div>
       </div>
     </div>
