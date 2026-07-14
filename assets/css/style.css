@@ -240,7 +240,13 @@ h3 { font-size: 20px; margin: 0 0 8px; }
   gap: 18px;
   margin-top: 36px;
 }
-@media (max-width: 860px) { .cards { grid-template-columns: 1fr; } }
+/* A 4-card grid balances as 2x2 (never 3 + 1 hanging). The default 3-col rule
+   above stays for 3-card grids (a clean single row). */
+.cards-2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 860px) {
+  .cards,
+  .cards-2 { grid-template-columns: 1fr; }
+}
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
