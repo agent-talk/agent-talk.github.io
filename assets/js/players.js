@@ -12,6 +12,13 @@
 //   data-controls="false"               show player controls
 //   data-font="small|medium|big"        terminalFontSize
 //   data-theme="asciinema"              player theme
+//   data-sync-group="name"              lockstep group: all players in the
+//                                        group start together and restart
+//                                        together when every member has ended
+//                                        (used for side-by-side recordings of
+//                                        one conversation). Implies looping via
+//                                        the group controller, so the player's
+//                                        own loop option is disabled.
 
 (function () {
   "use strict";
@@ -23,9 +30,12 @@
   }
 
   function optionsFor(el) {
+    var synced = !!el.getAttribute("data-sync-group");
     return {
       fit: "width",
-      loop: boolAttr(el, "data-loop", false),
+      // synced players never self-loop: the group controller restarts them
+      // together, otherwise the two panes drift apart in the browser.
+      loop: synced ? false : boolAttr(el, "data-loop", false),
       controls: boolAttr(el, "data-controls", false),
       autoPlay: false, // we drive play/pause ourselves
       idleTimeLimit: parseFloat(el.getAttribute("data-idle") || "2"),
@@ -57,14 +67,70 @@
     );
     var entries = containers.map(function (el) {
       return { el: el, player: mount(el), started: false,
-               mode: el.getAttribute("data-autoplay") || "onscroll" };
+               mode: el.getAttribute("data-autoplay") || "onscroll",
+               group: el.getAttribute("data-sync-group") || null };
     });
+
+    // ---- lockstep groups ------------------------------------------------
+    // Members of a group start in the same tick and, because each cast in a
+    // pair is post-processed to the exact same duration, they stay aligned.
+    // When every member has fired "ended", the controller seeks all to 0 and
+    // replays them together, so the loop itself can never accumulate drift.
+    var groups = {};
+    entries.forEach(function (e) {
+      if (!e.group || !e.player) return;
+      (groups[e.group] = groups[e.group] || []).push(e);
+    });
+
+    function playGroup(members) {
+      members.forEach(function (m) {
+        try { m.player.play(); m.started = true; } catch (_) {}
+      });
+    }
+
+    function pauseGroup(members) {
+      members.forEach(function (m) {
+        try { m.player.pause(); } catch (_) {}
+      });
+    }
+
+    Object.keys(groups).forEach(function (name) {
+      var members = groups[name];
+      var endedCount = 0;
+      members.forEach(function (m) {
+        m.player.addEventListener("ended", function () {
+          endedCount += 1;
+          if (endedCount >= members.length) {
+            endedCount = 0;
+            members.forEach(function (x) {
+              try { x.player.seek(0); } catch (_) {}
+            });
+            // replay together, but only while someone can see it
+            var anyVisible = members.some(function (x) { return x.visible; });
+            if (anyVisible) playGroup(members);
+          }
+        });
+      });
+    });
+
+    function playEntry(e) {
+      if (e.group) playGroup(groups[e.group]);
+      else { try { e.player.play(); e.started = true; } catch (_) {} }
+    }
+
+    function pauseEntry(e) {
+      if (e.group) {
+        // only pause the group when NO member is on screen
+        var anyVisible = groups[e.group].some(function (m) { return m.visible; });
+        if (!anyVisible) pauseGroup(groups[e.group]);
+      } else {
+        try { e.player.pause(); } catch (_) {}
+      }
+    }
 
     // Immediate autoplay
     entries.forEach(function (e) {
-      if (e.player && e.mode === "true") {
-        try { e.player.play(); e.started = true; } catch (_) {}
-      }
+      if (e.player && e.mode === "true") playEntry(e);
     });
 
     // Autoplay on scroll into view (pi.dev-style). Pauses off-screen loops.
@@ -75,10 +141,11 @@
             return e.el === entry.target;
           })[0];
           if (!rec || !rec.player || rec.mode !== "onscroll") return;
+          rec.visible = entry.isIntersecting;
           if (entry.isIntersecting) {
-            try { rec.player.play(); rec.started = true; } catch (_) {}
+            playEntry(rec);
           } else if (rec.started) {
-            try { rec.player.pause(); } catch (_) {}
+            pauseEntry(rec);
           }
         });
       }, { threshold: 0.4 });
@@ -88,9 +155,7 @@
     } else {
       // No IO support: just play the onscroll ones.
       entries.forEach(function (e) {
-        if (e.player && e.mode === "onscroll") {
-          try { e.player.play(); } catch (_) {}
-        }
+        if (e.player && e.mode === "onscroll") playEntry(e);
       });
     }
   });
