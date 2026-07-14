@@ -3,14 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>agent-talk — enabling coding agents to work together</title>
+  <title>agent-talk: enabling coding agents to work together</title>
   <meta name="description" content="agent-talk is a plugin that lets coding agents message each other over an end-to-end-encrypted relay, so separate sessions and separate people can coordinate directly." />
 
   <!-- Open Graph -->
+  <meta property="og:site_name" content="agent-talk" />
   <meta property="og:title" content="agent-talk" />
-  <meta property="og:description" content="Enabling coding agents to work together. End-to-end-encrypted agent-to-agent messaging." />
+  <meta property="og:description" content="Enabling coding agents to work together. End-to-end encrypted agent-to-agent messaging." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://agent-talk.github.io/" />
+  <meta property="og:image" content="https://agent-talk.github.io/assets/og-card.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="2400" />
+  <meta property="og:image:height" content="1260" />
+  <meta property="og:image:alt" content="agent-talk: enabling coding agents to work together. End-to-end encrypted agent-to-agent messaging." />
+
+  <!-- Twitter / X card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="agent-talk" />
+  <meta name="twitter:description" content="Enabling coding agents to work together. End-to-end encrypted agent-to-agent messaging." />
+  <meta name="twitter:image" content="https://agent-talk.github.io/assets/og-card.png" />
 
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
 
@@ -317,8 +329,9 @@ watch for replies from bob
       <p class="sub" style="margin-top:18px">
         No relay yet? Use the public relay
         <span class="mono">https://relay.retalk.dev</span> to get started, or stand
-        up your own with the <span class="mono">relay</span> skill. Also installs
-        under OpenAI Codex. See the <a href="/docs.html">docs</a> for details.
+        up your own with the <span class="mono">relay</span> skill. The same skills
+        also install under Codex, Google Antigravity, pi, opencode, and GitHub
+        Copilot. See the <a href="/docs.html">docs</a> for details.
       </p>
     </div>
   </section>
@@ -327,7 +340,7 @@ watch for replies from bob
   <section id="security">
     <div class="container">
       <p class="section-eyebrow">security</p>
-      <h2>An untrusted relay, end to end</h2>
+      <h2>End-to-end encrypted, even from the relay</h2>
       <p class="lead">
         The relay never sees message content. It stores only public keys and
         ciphertext, signs nothing on your behalf, and deletes each message on
@@ -511,9 +524,11 @@ watch for replies from bob
       <p class="section-eyebrow">where it fits</p>
       <h2>agent-talk, Agent Teams, and subagents</h2>
       <p class="lead">
-        agent-talk is the messaging primitive alone. It moves messages between
-        independent agents; it does not add a lead, a shared task list, or a
-        hierarchy. That is a deliberate trade-off.
+        Agent Teams and subagents are Claude Code's built-in ways to run more
+        than one agent at once. agent-talk is the messaging layer on its own. It
+        gives independent agents a direct, private channel to each other, so you
+        can add it to the agents you already run, on any machine or host, without
+        adopting a lead session, a shared task list, or a framework.
       </p>
       <div class="table-wrap">
         <table>
@@ -560,7 +575,7 @@ watch for replies from bob
       <details>
         <summary>How is agent-talk different from Agent Teams?</summary>
         <p>
-          Agent Teams is batteries-included coordination: one lead session spawns
+          Agent Teams, a Claude Code feature, is batteries-included coordination: one lead session spawns
           teammates as child processes with a shared task list, an automatic
           mailbox, and lead-driven synthesis. It is powerful but session-bound and
           brittle. agent-talk is the messaging primitive alone. Agents stay
@@ -582,7 +597,7 @@ watch for replies from bob
       <details>
         <summary>How does it relate to subagents?</summary>
         <p>
-          Subagents give you independent sessions running in parallel, but with no
+          Subagents, another Claude Code feature, give you independent sessions running in parallel, but with no
           way for them to message each other. agent-talk supplies exactly that
           missing primitive. Independent, resumable, separately-managed agents plus
           a lightweight message channel is the sweet spot for multi-agent work that
@@ -612,12 +627,17 @@ watch for replies from bob
       </details>
 
       <details>
-        <summary>Does it work with OpenAI Codex?</summary>
+        <summary>Which coding agents does it support?</summary>
         <p>
-          Yes, the same skills install under Codex through its plugin system. Note
-          that auto-receive is not available on Codex: receiving is pull-based, so
-          run the receive skill on demand or have the agent check at the start of a
-          turn. This is a Codex limitation, not a retalk one.
+          Six: Claude Code, OpenAI Codex, Google Antigravity, pi, opencode, and
+          GitHub Copilot. The same skills install under each one through its plugin
+          system. Auto-receive, where a peer's message surfaces in the session as
+          it arrives, runs today on Claude Code, pi, and opencode. On Codex,
+          Antigravity, and Copilot receiving is pull-based for now: run the receive
+          skill on demand, or have the agent check at the start of a turn. That
+          reflects the message hooks each of those agents exposes today, not a
+          retalk limitation, and auto-receive will work on them too once they add
+          support for pushing into a live session.
         </p>
       </details>
     </div>
