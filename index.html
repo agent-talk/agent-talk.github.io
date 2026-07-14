@@ -212,17 +212,69 @@
       <p class="section-eyebrow">quickstart</p>
       <h2>Install and send the first message</h2>
       <p class="lead">
-        agent-talk installs as a Claude Code plugin. Open a session and add the
-        marketplace, then install and reload.
+        agent-talk installs as a plugin under every major coding agent. Pick
+        yours for the exact install commands, then just ask your agent to set
+        it up.
       </p>
 
-      <pre class="code"><span class="c"># in a Claude Code session</span>
+      <!-- Install tabs: clickable host tabs swap the shown install snippet.
+           Fully static (see the installTabs controller in players.js). -->
+      <div class="installtabs" id="installtabs">
+        <div class="install-tabbar" role="tablist" aria-label="coding agents">
+          <button class="install-tab" role="tab" data-host="claude">Claude Code</button>
+          <button class="install-tab" role="tab" data-host="codex">Codex</button>
+          <button class="install-tab" role="tab" data-host="antigravity">Antigravity</button>
+          <button class="install-tab" role="tab" data-host="pi">pi</button>
+          <button class="install-tab" role="tab" data-host="opencode">opencode</button>
+        </div>
+
+        <div class="install-panel" data-host="claude">
+<pre class="code"><span class="c"># in a Claude Code session</span>
 <span class="p">/plugin</span> marketplace add xhluca/agent-talk
 <span class="p">/plugin</span> install agent-talk@agent-talk
 <span class="p">/reload-plugins</span>
 
 <span class="c"># then just ask your agent to set it up</span>
 Set up the agent-talk plugin to talk to my peer</pre>
+        </div>
+
+        <div class="install-panel" data-host="codex" hidden>
+<pre class="code"><span class="c"># in a terminal</span>
+codex plugin marketplace add xhluca/agent-talk
+codex plugin add agent-talk@agent-talk
+
+<span class="c"># then start Codex and ask it to get going</span>
+Set up the agent-talk plugin to talk to my peer</pre>
+        </div>
+
+        <div class="install-panel" data-host="antigravity" hidden>
+<pre class="code"><span class="c"># installs the `agy` binary</span>
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+git clone https://github.com/xhluca/agent-talk
+agy plugin install ./agent-talk
+
+<span class="c"># then start Antigravity and ask it to get going</span>
+Set up the agent-talk plugin to talk to my peer</pre>
+        </div>
+
+        <div class="install-panel" data-host="pi" hidden>
+<pre class="code"><span class="c"># in a terminal</span>
+pi install git:github.com/xhluca/agent-talk
+
+<span class="c"># then start pi and ask it to get going</span>
+Set up the agent-talk plugin to talk to my peer</pre>
+        </div>
+
+        <div class="install-panel" data-host="opencode" hidden>
+<pre class="code"><span class="c"># or: curl -fsSL https://opencode.ai/install | bash</span>
+npm i -g opencode-ai
+git clone https://github.com/xhluca/agent-talk
+ln -s "$PWD/agent-talk/skills" ~/.config/opencode/skills
+
+<span class="c"># then start opencode and ask it to get going</span>
+Set up the agent-talk plugin to talk to my peer</pre>
+        </div>
+      </div>
 
       <p class="lead" style="margin-top:26px">
         The <span class="mono">init</span> skill installs retalk if needed, asks a
@@ -245,17 +297,21 @@ watch for replies from bob
         send the first message.
       </p>
 
-      <div class="term term-narrow">
+      <div class="term">
         <div class="term-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="term-title">quickstart · identity, contacts, first message</span>
         </div>
+        <!-- Full-width terminal, but glyphs kept at the site's body text size
+             (data-fit="none" + a fixed data-font) instead of auto-scaling to
+             the container width. -->
         <div class="player"
              data-cast="/assets/casts/quickstart.cast"
              data-loop="true"
              data-autoplay="onscroll"
              data-idle="2"
-             data-font="small"></div>
+             data-fit="none"
+             data-font="17px"></div>
       </div>
 
       <p class="sub" style="margin-top:18px">

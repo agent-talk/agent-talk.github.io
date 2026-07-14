@@ -10,7 +10,12 @@
 //   data-speed="1.0"                    playback speed
 //   data-idle="2"                       idleTimeLimit seconds
 //   data-controls="false"               show player controls
-//   data-font="small|medium|big"        terminalFontSize
+//   data-font="small|medium|big|<px>"   terminalFontSize (a px value is used
+//                                        only when data-fit="none")
+//   data-fit="width|none"               "width" auto-scales glyphs to the
+//                                        container (default); "none" keeps a
+//                                        fixed terminalFontSize so a full-width
+//                                        terminal renders at a chosen px size
 //   data-theme="asciinema"              player theme
 //   data-sync-group="name"              lockstep group: all players in the
 //                                        group start together and restart
@@ -31,8 +36,13 @@
 
   function optionsFor(el) {
     var synced = !!el.getAttribute("data-sync-group");
+    // fit:"width" auto-scales the glyphs to fill the container (used by the
+    // side-by-side demos). data-fit="none" keeps a FIXED terminalFontSize
+    // instead, so a full-width terminal renders text at a chosen px size
+    // (e.g. the site's body size) rather than ballooning with the width.
+    var fit = el.getAttribute("data-fit") || "width";
     return {
-      fit: "width",
+      fit: fit,
       // synced players never self-loop: the group controller restarts them
       // together, otherwise the two panes drift apart in the browser.
       loop: synced ? false : boolAttr(el, "data-loop", false),
@@ -246,5 +256,42 @@
       visible = true;
       if (player) { try { player.play(); } catch (_) {} }
     }
+  });
+
+  // ---- install tabs --------------------------------------------------
+  // Clickable coding-agent tabs that swap the shown install snippet. All
+  // panels live in the DOM; the controller just toggles which one is visible.
+  // Defaults to the first tab (Claude Code). Fully static; degrades to showing
+  // the default panel if JS is unavailable (only the first panel is unhidden).
+  ready(function () {
+    var root = document.getElementById("installtabs");
+    if (!root) return;
+    var tabs = Array.prototype.slice.call(
+      root.querySelectorAll(".install-tab")
+    );
+    var panels = Array.prototype.slice.call(
+      root.querySelectorAll(".install-panel")
+    );
+    if (!tabs.length || !panels.length) return;
+
+    function select(host) {
+      tabs.forEach(function (t) {
+        t.setAttribute("aria-selected", t.getAttribute("data-host") === host
+          ? "true" : "false");
+      });
+      panels.forEach(function (p) {
+        if (p.getAttribute("data-host") === host) p.removeAttribute("hidden");
+        else p.setAttribute("hidden", "");
+      });
+    }
+
+    tabs.forEach(function (t) {
+      t.addEventListener("click", function () {
+        select(t.getAttribute("data-host"));
+      });
+    });
+
+    // Default to the first tab.
+    select(tabs[0].getAttribute("data-host"));
   });
 })();

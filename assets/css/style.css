@@ -113,6 +113,9 @@ h1, h2, h3 { line-height: 1.2; letter-spacing: -0.01em; }
 h2 { font-size: 34px; margin: 0 0 18px; }
 h3 { font-size: 20px; margin: 0 0 8px; }
 .lead { font-size: 19px; color: var(--fg-muted); max-width: 720px; }
+/* the security section's intro spans the full content width like its section
+   heading, rather than being capped at the default .lead measure. */
+#security .lead { max-width: none; }
 
 /* ---------- hero ---------- */
 .hero { padding: 96px 0 72px; border-bottom: 1px solid var(--border-soft); }
@@ -158,11 +161,12 @@ h3 { font-size: 20px; margin: 0 0 8px; }
 }
 .term .player { line-height: 0; }
 
-/* A single, full-width terminal (e.g. the quickstart cast) would scale its
-   font to the whole content column, making it much larger than the two-up
-   demo terminals. Cap it to the same width those columns get so the rendered
-   terminal font matches the rest of the page. */
-.term-narrow { max-width: 520px; margin-left: auto; margin-right: auto; }
+/* The quickstart terminal is full width but keeps a fixed body-size font
+   (data-fit="none"), so its 76-column grid is narrower than the frame. Left-
+   align it in the frame (the player otherwise centers it) so it reads like a
+   normal terminal flush to the left edge, and add a little inner padding. */
+#quickstart .term .ap-wrapper { justify-content: flex-start; }
+#quickstart .term .player { padding: 4px 16px; }
 
 /* asciinema-player theme tweaks so it sits flush in the frame */
 .term .asciinema-player-theme-agenttalk,
@@ -287,6 +291,39 @@ h3 { font-size: 20px; margin: 0 0 8px; }
 }
 .code .c { color: var(--fg-dim); }
 .code .p { color: var(--accent-2); }
+
+/* ---------- install tabs ---------- */
+.installtabs { margin-top: 8px; }
+.install-tabbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 10px;
+}
+.install-tab {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: color .12s ease, background .12s ease, border-color .12s ease;
+}
+.install-tab:hover {
+  color: var(--fg);
+  background: var(--bg-elev);
+  border-color: var(--border-soft);
+}
+.install-tab[aria-selected="true"] {
+  color: var(--accent-2);
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+.install-panel .code { margin: 0; }
 
 /* ---------- scenario / story ---------- */
 .story {
