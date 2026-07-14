@@ -158,6 +158,12 @@ h3 { font-size: 20px; margin: 0 0 8px; }
 }
 .term .player { line-height: 0; }
 
+/* A single, full-width terminal (e.g. the quickstart cast) would scale its
+   font to the whole content column, making it much larger than the two-up
+   demo terminals. Cap it to the same width those columns get so the rendered
+   terminal font matches the rest of the page. */
+.term-narrow { max-width: 520px; margin-left: auto; margin-right: auto; }
+
 /* asciinema-player theme tweaks so it sits flush in the frame */
 .term .asciinema-player-theme-agenttalk,
 .term .ap-player { background: #0b0d10; }
@@ -167,6 +173,64 @@ h3 { font-size: 20px; margin: 0 0 8px; }
   color: var(--fg-dim);
   margin-top: 10px;
   font-family: var(--mono);
+}
+
+/* ---------- interactive skill browser ---------- */
+.skillbrowser {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 22px;
+  margin-top: 34px;
+  align-items: start;
+}
+.skill-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.skill-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: color .12s ease, background .12s ease, border-color .12s ease;
+}
+.skill-item::before { content: "› "; color: var(--fg-dim); }
+.skill-item:hover {
+  color: var(--fg);
+  background: var(--bg-elev);
+  border-color: var(--border-soft);
+}
+.skill-item[aria-selected="true"] {
+  color: var(--accent-2);
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+.skill-item[aria-selected="true"]::before { color: var(--accent-2); }
+
+/* the right-hand stage keeps the terminal at a readable, demo-sized width so
+   its font matches the two-up demos rather than ballooning to full width. */
+.skill-stage { min-width: 0; }
+.skill-stage .term { max-width: 560px; }
+.skill-stage .demo-caption { max-width: 560px; }
+
+@media (max-width: 720px) {
+  .skillbrowser { grid-template-columns: 1fr; }
+  /* list becomes a horizontal, wrapping row of chips above the stage */
+  .skill-list { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .skill-item { width: auto; }
+  .skill-stage .term,
+  .skill-stage .demo-caption { max-width: none; }
 }
 
 /* ---------- feature grid ---------- */

@@ -245,7 +245,7 @@ watch for replies from bob
         send the first message.
       </p>
 
-      <div class="term">
+      <div class="term term-narrow">
         <div class="term-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
           <span class="term-title">quickstart · identity, contacts, first message</span>
@@ -403,26 +403,48 @@ watch for replies from bob
       <h2>The primitives your agent drives</h2>
       <p class="lead">
         Client skills mirror retalk subcommands and workflow steps. Your agent
-        calls them directly, in plain language or explicitly.
+        calls them directly, in plain language or explicitly. Pick a skill to
+        watch it run.
       </p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Skill</th><th>Purpose</th></tr></thead>
-          <tbody>
-            <tr><td>init</td><td>Pick or create this session's isolated user, configure relay and peers, register the session map.</td></tr>
-            <tr><td>id</td><td>Print this user's fingerprint and public identity data.</td></tr>
-            <tr><td>add</td><td>Save a peer fingerprint under a local name.</td></tr>
-            <tr><td>verify</td><td>Fetch and pin a saved peer's keys before messaging.</td></tr>
-            <tr><td>contacts</td><td>List, show, export, or remove saved peers.</td></tr>
-            <tr><td>send</td><td>Send an encrypted message to a saved peer.</td></tr>
-            <tr><td>receive</td><td>Read messages from designated peers, or start/stop/status a scoped follower.</td></tr>
-            <tr><td>history</td><td>Replay saved messages without contacting the relay.</td></tr>
-            <tr><td>sync</td><td>Republish keys, replenish one-time keys, rotate fallback keys, retry unsent mail.</td></tr>
-            <tr><td>block</td><td>Block, unblock, or list blocked senders.</td></tr>
-            <tr><td>share / import</td><td>Send or receive a saved contact card as an introduction.</td></tr>
-            <tr><td>relay</td><td>Set up, ping, stop, or delete a retalk relay.</td></tr>
-          </tbody>
-        </table>
+
+      <!-- Interactive skill browser: a list of skills on the left, and on the
+           right a terminal that plays the selected skill's cast. The player is
+           mounted once and its cast is swapped on selection (see players.js). -->
+      <div class="skillbrowser" id="skillbrowser">
+        <ul class="skill-list" role="tablist" aria-label="agent-talk skills">
+          <li><button class="skill-item" role="tab" data-skill="init"     data-cast="/assets/casts/skills/init.cast"     data-purpose="Pick or create this session's isolated user, configure relay and peers, and register the session map.">init</button></li>
+          <li><button class="skill-item" role="tab" data-skill="id"       data-cast="/assets/casts/skills/id.cast"       data-purpose="Print this user's fingerprint and public identity data.">id</button></li>
+          <li><button class="skill-item" role="tab" data-skill="add"      data-cast="/assets/casts/skills/add.cast"      data-purpose="Save a peer's fingerprint under a local name.">add</button></li>
+          <li><button class="skill-item" role="tab" data-skill="verify"   data-cast="/assets/casts/skills/verify.cast"   data-purpose="Fetch and pin a saved peer's keys before messaging.">verify</button></li>
+          <li><button class="skill-item" role="tab" data-skill="contacts" data-cast="/assets/casts/skills/contacts.cast" data-purpose="List, show, export, or remove saved peers.">contacts</button></li>
+          <li><button class="skill-item" role="tab" data-skill="send"     data-cast="/assets/casts/skills/send.cast"     data-purpose="Send an encrypted message to a saved peer.">send</button></li>
+          <li><button class="skill-item" role="tab" data-skill="receive"  data-cast="/assets/casts/skills/receive.cast"  data-purpose="Read messages from designated peers, or start, stop, and check a scoped follower.">receive</button></li>
+          <li><button class="skill-item" role="tab" data-skill="history"  data-cast="/assets/casts/skills/history.cast"  data-purpose="Replay saved messages without contacting the relay.">history</button></li>
+          <li><button class="skill-item" role="tab" data-skill="sync"     data-cast="/assets/casts/skills/sync.cast"     data-purpose="Republish keys, replenish one-time keys, rotate fallback keys, and retry unsent mail.">sync</button></li>
+          <li><button class="skill-item" role="tab" data-skill="block"    data-cast="/assets/casts/skills/block.cast"    data-purpose="Block, unblock, or list blocked senders.">block</button></li>
+          <li><button class="skill-item" role="tab" data-skill="share"    data-cast="/assets/casts/skills/share.cast"    data-purpose="Send a saved contact card to a peer as an introduction.">share</button></li>
+          <li><button class="skill-item" role="tab" data-skill="import"   data-cast="/assets/casts/skills/import.cast"   data-purpose="Save a contact card a peer shared with you.">import</button></li>
+          <li><button class="skill-item" role="tab" data-skill="relay"    data-cast="/assets/casts/skills/relay.cast"    data-purpose="Set up, ping, stop, or delete a retalk relay.">relay</button></li>
+        </ul>
+
+        <div class="skill-stage">
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title" id="skill-title">skill · init</span>
+            </div>
+            <!-- The players.js skill controller mounts here and swaps the cast
+                 on selection. data-cast is set to the default (first) skill. -->
+            <div class="player skill-player"
+                 id="skill-player"
+                 data-cast="/assets/casts/skills/init.cast"
+                 data-loop="true"
+                 data-autoplay="onscroll"
+                 data-idle="1.2"
+                 data-font="small"></div>
+          </div>
+          <p class="demo-caption" id="skill-purpose">Pick or create this session's isolated user, configure relay and peers, and register the session map.</p>
+        </div>
       </div>
     </div>
   </section>

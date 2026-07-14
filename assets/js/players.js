@@ -62,8 +62,10 @@
   }
 
   ready(function () {
+    // The skill browser owns its own player (mount + cast swap), so keep it
+    // out of the generic auto-mount pass below.
     var containers = Array.prototype.slice.call(
-      document.querySelectorAll(".player[data-cast]")
+      document.querySelectorAll(".player[data-cast]:not(.skill-player)")
     );
     var entries = containers.map(function (el) {
       return { el: el, player: mount(el), started: false,
@@ -157,6 +159,92 @@
       entries.forEach(function (e) {
         if (e.player && e.mode === "onscroll") playEntry(e);
       });
+    }
+  });
+
+  // ---- interactive skill browser -------------------------------------
+  // A list of skills on the left; clicking one swaps the cast shown in the
+  // terminal on the right and updates the purpose caption. The player is
+  // disposed and re-created on each selection so the vendored player always
+  // starts the new cast cleanly. Defaults to the first skill, and only plays
+  // while the browser is on screen.
+  ready(function () {
+    if (!window.AsciinemaPlayer) return;
+    var root = document.getElementById("skillbrowser");
+    var el = document.getElementById("skill-player");
+    if (!root || !el) return;
+
+    var items = Array.prototype.slice.call(
+      root.querySelectorAll(".skill-item")
+    );
+    if (!items.length) return;
+
+    var titleEl = document.getElementById("skill-title");
+    var purposeEl = document.getElementById("skill-purpose");
+    var player = null;
+    var current = null;   // currently-selected .skill-item
+    var visible = false;
+
+    function makeOptions(cast) {
+      return {
+        fit: "width",
+        loop: true,
+        controls: false,
+        autoPlay: false,
+        idleTimeLimit: parseFloat(el.getAttribute("data-idle") || "1.2"),
+        speed: 1,
+        terminalFontSize: el.getAttribute("data-font") || "small",
+        theme: el.getAttribute("data-theme") || "asciinema",
+        poster: "npt:0:01"
+      };
+    }
+
+    function mountCast(cast) {
+      if (player) {
+        try { player.dispose(); } catch (_) {}
+        player = null;
+      }
+      el.innerHTML = "";
+      el.dataset.cast = cast;
+      player = window.AsciinemaPlayer.create(cast, el, makeOptions(cast));
+      if (visible) { try { player.play(); } catch (_) {} }
+    }
+
+    function select(item) {
+      if (item === current) return;
+      if (current) current.setAttribute("aria-selected", "false");
+      current = item;
+      item.setAttribute("aria-selected", "true");
+      var cast = item.getAttribute("data-cast");
+      var skill = item.getAttribute("data-skill");
+      var purpose = item.getAttribute("data-purpose");
+      if (titleEl) titleEl.textContent = "skill · " + skill;
+      if (purposeEl && purpose) purposeEl.textContent = purpose;
+      mountCast(cast);
+    }
+
+    items.forEach(function (item) {
+      item.setAttribute("aria-selected", "false");
+      item.addEventListener("click", function () { select(item); });
+    });
+
+    // Default to the first skill.
+    select(items[0]);
+
+    // Only play while the browser is visible (pauses off-screen).
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (obs) {
+        obs.forEach(function (entry) {
+          visible = entry.isIntersecting;
+          if (!player) return;
+          if (visible) { try { player.play(); } catch (_) {} }
+          else { try { player.pause(); } catch (_) {} }
+        });
+      }, { threshold: 0.35 });
+      io.observe(root);
+    } else {
+      visible = true;
+      if (player) { try { player.play(); } catch (_) {} }
     }
   });
 })();
