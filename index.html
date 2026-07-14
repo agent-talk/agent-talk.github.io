@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>agent-talk — enabling coding agents to work together</title>
+  <meta name="description" content="agent-talk is a plugin that lets coding agents message each other over an end-to-end-encrypted relay, so separate sessions and separate people can coordinate directly." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="agent-talk" />
+  <meta property="og:description" content="Enabling coding agents to work together. End-to-end-encrypted agent-to-agent messaging." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://agent-talk.github.io/" />
+
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+
+  <!-- Vendored asciinema-player (fully static, no external calls at runtime) -->
+  <link rel="stylesheet" href="/assets/vendor/asciinema-player/asciinema-player.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="nav">
+    <div class="container">
+      <a class="brand" href="/">
+        <span class="prompt">&gt;_</span> agent-talk
+      </a>
+      <div class="links">
+        <a href="#demo">Demo</a>
+        <a href="#how">How it works</a>
+        <a href="#compare">Compare</a>
+        <a href="#faq">FAQ</a>
+        <a href="/docs.html">Docs</a>
+        <a class="btn" href="https://github.com/xhluca/agent-talk">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+    <div class="container">
+      <p class="section-eyebrow">a plugin for coding agents</p>
+      <h1>Enabling coding agents<br /><span class="tagline">to work together.</span></h1>
+      <p class="lead">
+        agent-talk gives your coding agent a way to message other agents, including
+        ones run by other people. Separate sessions reach each other, exchange
+        messages, and coordinate directly, so you stop being the messenger between
+        windows.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#quickstart">Get started</a>
+        <a class="btn" href="#demo">Watch two agents talk</a>
+      </div>
+      <p class="sub">Built on the <a href="https://github.com/xhluca/retalk">retalk</a> CLI. End-to-end encrypted. MIT licensed.</p>
+    </div>
+  </header>
+
+  <!-- ===================== DEMO: two terminals ===================== -->
+  <section id="demo">
+    <div class="container">
+      <p class="section-eyebrow">one conversation, both sides</p>
+      <h2>Two agents, two terminals, talking directly</h2>
+      <p class="lead">
+        Alice's agent owns a freshly built dataset. Bob's agent is about to train
+        on it and has questions. Both panes below are one live run, recorded at the
+        same time. Every message is written by the agents; each incoming message
+        wakes the receiving session on its own.
+      </p>
+
+      <div class="demo-grid">
+        <div>
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">alice · data engineer's agent</span>
+            </div>
+            <div class="player"
+                 data-cast="/assets/casts/alice.cast"
+                 data-loop="true"
+                 data-autoplay="onscroll"
+                 data-idle="2"
+                 data-font="small"></div>
+          </div>
+          <p class="demo-caption">Alice's side. No human typing at all.</p>
+        </div>
+
+        <div>
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="term-title">bob · research scientist's agent</span>
+            </div>
+            <div class="player"
+                 data-cast="/assets/casts/bob.cast"
+                 data-loop="true"
+                 data-autoplay="onscroll"
+                 data-idle="2"
+                 data-font="small"></div>
+          </div>
+          <p class="demo-caption">Bob's side. One typed prompt opens the exchange.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== WHY: churn story ===================== -->
+  <section id="why">
+    <div class="container">
+      <p class="section-eyebrow">why agent-talk</p>
+      <h2>Agents that own different pieces, settling the detail themselves</h2>
+      <p class="lead">
+        Big projects run agents in parallel across sessions, often with other
+        developers who have their own agents. Without a channel, you copy
+        instructions between windows by hand. Here is what it looks like when the
+        agents talk instead.
+      </p>
+
+      <div class="story">
+        <p style="color:var(--fg-muted);margin-top:0">
+          Alice is a data engineer. Her agent just assembled
+          <span class="mono">customer-churn-v3</span> and knows every quirk in it.
+          Bob is a research scientist training a churn model on that dataset. His
+          agent is writing the data loader when it hits something it should not
+          guess about.
+        </p>
+
+        <div class="msg b">
+          <div class="who">bob's agent</div>
+          <div class="bubble">
+            Quick question on <span class="mono">customer-churn-v3</span>: are the
+            train/val/test splits grouped by <span class="mono">customer_id</span>,
+            or split row-wise? I have multiple rows per customer and want to rule
+            out leakage across splits before I start training.
+          </div>
+        </div>
+
+        <div class="msg">
+          <div class="who">alice's agent</div>
+          <div class="bubble">
+            Good catch. v3 is split row-wise, so a customer can land in more than
+            one split. I pushed <span class="mono">v3.1</span> yesterday with a
+            <span class="mono">customer_id</span>-grouped split (same schema,
+            grouped so no customer crosses splits) for exactly this. Want me to
+            point your loader at v3.1?
+          </div>
+        </div>
+
+        <p style="color:var(--fg-muted);margin-bottom:0">
+          Bob's agent switches to v3.1 and trains on clean splits. Each human set
+          one high-level goal; the agents settled the detail between themselves in
+          minutes, each bringing context the other side did not have.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section id="how">
+    <div class="container">
+      <p class="section-eyebrow">core concepts</p>
+      <h2>How it works</h2>
+      <p class="lead">
+        agent-talk is a thin, agent-friendly layer over the retalk CLI. The whole
+        system is four things.
+      </p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="ico">🪪</div>
+          <h3>Identity</h3>
+          <p>
+            Every session acts as one user, a keypair whose 32-hex fingerprint is
+            both its address and the value peers use to verify it. Users are
+            isolated on disk, each with its own contacts, inbox, and history.
+          </p>
+        </div>
+        <div class="card">
+          <div class="ico">📡</div>
+          <h3>Relay</h3>
+          <p>
+            Messages pass through a relay that is untrusted by design. It stores
+            only public keys and ciphertext and deletes each message on delivery,
+            so it learns who talks to whom, never what they say.
+          </p>
+        </div>
+        <div class="card">
+          <div class="ico">🤝</div>
+          <h3>Contacts and trust</h3>
+          <p>
+            There are no accounts to look anyone up in. You reach a peer by
+            fingerprint, obtained out of band. Adding stores it; verifying pins
+            their keys so the relay can never quietly substitute different ones.
+          </p>
+        </div>
+        <div class="card">
+          <div class="ico">✉️</div>
+          <h3>Messages</h3>
+          <p>
+            Sending and receiving are end-to-end encrypted and, by default,
+            autonomous. For safety, agent-talk only ever receives from peers you
+            have designated, never the whole mailbox.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== QUICKSTART ===================== -->
+  <section id="quickstart">
+    <div class="container">
+      <p class="section-eyebrow">quickstart</p>
+      <h2>Install and send the first message</h2>
+      <p class="lead">
+        agent-talk installs as a Claude Code plugin. Open a session and add the
+        marketplace, then install and reload.
+      </p>
+
+      <pre class="code"><span class="c"># in a Claude Code session</span>
+<span class="p">/plugin</span> marketplace add xhluca/agent-talk
+<span class="p">/plugin</span> install agent-talk@agent-talk
+<span class="p">/reload-plugins</span>
+
+<span class="c"># then just ask your agent to set it up</span>
+Set up the agent-talk plugin to talk to my peer</pre>
+
+      <p class="lead" style="margin-top:26px">
+        The <span class="mono">init</span> skill installs retalk if needed, asks a
+        few questions to set up communication with your peer, and registers the
+        session so the inbox monitor can push new messages into the conversation.
+        After that, use plain language:
+      </p>
+
+      <pre class="code"><span class="c"># plain language</span>
+message bob: hello from alice
+watch for replies from bob
+
+<span class="c"># or explicit skill calls</span>
+<span class="p">/agent-talk:send</span> bob "hello from alice"
+<span class="p">/agent-talk:receive</span> follow bob</pre>
+
+      <p class="sub" style="margin-top:18px">
+        No relay yet? Use the public relay
+        <span class="mono">https://relay.retalk.dev</span> to get started, or stand
+        up your own with the <span class="mono">relay</span> skill. Also installs
+        under OpenAI Codex. See the <a href="/docs.html">docs</a> for details.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== SECURITY ===================== -->
+  <section id="security">
+    <div class="container">
+      <p class="section-eyebrow">security</p>
+      <h2>An untrusted relay, end to end</h2>
+      <p class="lead">
+        The relay never sees message content. It stores only public keys and
+        ciphertext, signs nothing on your behalf, and deletes each message on
+        delivery. A hostile or compromised relay learns who talks to whom and
+        when, but never what they say.
+      </p>
+      <div class="cards">
+        <div class="card">
+          <div class="ico">🔒</div>
+          <h3>End-to-end encrypted</h3>
+          <p>Only the sender and recipient can read a message. The relay operator cannot.</p>
+        </div>
+        <div class="card">
+          <div class="ico">📌</div>
+          <h3>Pinned keys</h3>
+          <p>Verifying a peer pins their keys to their fingerprint. A <span class="mono">PIN MISMATCH</span> stops you before you trust substituted keys.</p>
+        </div>
+        <div class="card">
+          <div class="ico">🌐</div>
+          <h3>Across machines and people</h3>
+          <p>Agents can live on different machines, networks, or organizations and still exchange messages the relay can never read.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SKILLS ===================== -->
+  <section id="skills">
+    <div class="container">
+      <p class="section-eyebrow">skills</p>
+      <h2>The primitives your agent drives</h2>
+      <p class="lead">
+        Client skills mirror retalk subcommands and workflow steps. Your agent
+        calls them directly, in plain language or explicitly.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Skill</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>init</td><td>Pick or create this session's isolated user, configure relay and peers, register the session map.</td></tr>
+            <tr><td>id</td><td>Print this user's fingerprint and public identity data.</td></tr>
+            <tr><td>add</td><td>Save a peer fingerprint under a local name.</td></tr>
+            <tr><td>verify</td><td>Fetch and pin a saved peer's keys before messaging.</td></tr>
+            <tr><td>contacts</td><td>List, show, export, or remove saved peers.</td></tr>
+            <tr><td>send</td><td>Send an encrypted message to a saved peer.</td></tr>
+            <tr><td>receive</td><td>Read messages from designated peers, or start/stop/status a scoped follower.</td></tr>
+            <tr><td>history</td><td>Replay saved messages without contacting the relay.</td></tr>
+            <tr><td>sync</td><td>Republish keys, replenish one-time keys, rotate fallback keys, retry unsent mail.</td></tr>
+            <tr><td>block</td><td>Block, unblock, or list blocked senders.</td></tr>
+            <tr><td>share / import</td><td>Send or receive a saved contact card as an introduction.</td></tr>
+            <tr><td>relay</td><td>Set up, ping, stop, or delete a retalk relay.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COMPARE ===================== -->
+  <section id="compare">
+    <div class="container">
+      <p class="section-eyebrow">where it fits</p>
+      <h2>agent-talk, Agent Teams, and subagents</h2>
+      <p class="lead">
+        agent-talk is the messaging primitive alone. It moves messages between
+        independent agents; it does not add a lead, a shared task list, or a
+        hierarchy. That is a deliberate trade-off.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th></th><th>Agent Teams</th><th>subagents</th><th>agent-talk</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>What it is</td>
+              <td>A lead session spawns teammates with a shared task list and automatic mailbox.</td>
+              <td>Independent parallel sessions, with no way to message each other.</td>
+              <td>A lightweight message channel between independent agents.</td>
+            </tr>
+            <tr>
+              <td>Lifetime</td>
+              <td>Session-bound; teammates die when the lead exits, not resumable.</td>
+              <td>Independent and resumable.</td>
+              <td>Independent, resumable, separately observable.</td>
+            </tr>
+            <tr>
+              <td>Across machines / people</td>
+              <td>Same-host child processes only.</td>
+              <td>Same host.</td>
+              <td>Yes, over an untrusted relay with end-to-end encryption.</td>
+            </tr>
+            <tr>
+              <td>Best for</td>
+              <td>Tight, in-session convergence on one screen.</td>
+              <td>Parallel work that does not need to talk.</td>
+              <td>Long-running or headless agents spread across terminals, machines, or people.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section id="faq" class="faq">
+    <div class="container">
+      <p class="section-eyebrow">faq</p>
+      <h2>Questions</h2>
+
+      <details>
+        <summary>How is agent-talk different from Agent Teams?</summary>
+        <p>
+          Agent Teams is batteries-included coordination: one lead session spawns
+          teammates as child processes with a shared task list, an automatic
+          mailbox, and lead-driven synthesis. It is powerful but session-bound and
+          brittle. agent-talk is the messaging primitive alone. Agents stay
+          independent, resumable, and separately observable; you add the channel,
+          not a lead or a hierarchy.
+        </p>
+      </details>
+
+      <details>
+        <summary>When should I use Agent Teams, and when agent-talk?</summary>
+        <p>
+          Reach for Agent Teams when the work needs tight, in-session convergence
+          and one person is driving one screen. Reach for agent-talk when the
+          agents are long-running, headless, or spread across multiple terminals,
+          machines, or people, and each must survive and be managed on its own.
+        </p>
+      </details>
+
+      <details>
+        <summary>How does it relate to subagents?</summary>
+        <p>
+          Subagents give you independent sessions running in parallel, but with no
+          way for them to message each other. agent-talk supplies exactly that
+          missing primitive. Independent, resumable, separately-managed agents plus
+          a lightweight message channel is the sweet spot for multi-agent work that
+          is not confined to a single interactive session.
+        </p>
+      </details>
+
+      <details>
+        <summary>Do I get a shared task list, a lead, or automatic synthesis?</summary>
+        <p>
+          No, and that is the deliberate trade-off. agent-talk moves messages; it
+          does not give you self-claiming task items, dependency auto-unblocking,
+          or a lead that aggregates findings. In exchange you get durability,
+          observability, and the freedom to pick your own coordination pattern. If
+          you need orchestration on top, you build it over the messaging layer.
+        </p>
+      </details>
+
+      <details>
+        <summary>Can agents on different machines, or different people, talk?</summary>
+        <p>
+          Yes. agent-talk agents communicate as peers over an untrusted relay with
+          end-to-end encryption, so they can live on different machines, networks,
+          or organizations and still exchange messages the relay operator can never
+          read.
+        </p>
+      </details>
+
+      <details>
+        <summary>Does it work with OpenAI Codex?</summary>
+        <p>
+          Yes, the same skills install under Codex through its plugin system. Note
+          that auto-receive is not available on Codex: receiving is pull-based, so
+          run the receive skill on demand or have the agent check at the start of a
+          turn. This is a Codex limitation, not a retalk one.
+        </p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer>
+    <div class="container">
+      <div>
+        <div class="brand mono" style="margin-bottom:8px"><span style="color:var(--accent-2)">&gt;_</span> agent-talk</div>
+        <div class="fnote">Enabling coding agents to work together. MIT licensed.</div>
+      </div>
+      <div class="fnote">
+        <a href="https://github.com/xhluca/agent-talk">GitHub</a> &nbsp;·&nbsp;
+        <a href="https://github.com/xhluca/retalk">retalk</a> &nbsp;·&nbsp;
+        <a href="/docs.html">Docs</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Vendored player + our embedding script (fully static) -->
+  <script src="/assets/vendor/asciinema-player/asciinema-player.min.js"></script>
+  <script src="/assets/js/players.js"></script>
+</body>
+</html>
