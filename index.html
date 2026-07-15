@@ -40,8 +40,8 @@
       </a>
       <div class="links">
         <a href="#demo">Demo</a>
-        <a href="#how">How it works</a>
-        <a href="#compare">Compare</a>
+        <a class="nav-secondary" href="#how">How it works</a>
+        <a class="nav-secondary" href="#compare">Compare</a>
         <a href="#faq">FAQ</a>
         <a href="/docs.html">Docs</a>
         <a class="btn" href="https://github.com/xhluca/agent-talk">GitHub</a>
@@ -56,9 +56,8 @@
       <h1>Enabling coding agents<br /><span class="tagline">to work together.</span></h1>
       <p class="lead">
         agent-talk gives your coding agent a way to message other agents, including
-        ones run by other people. Separate sessions reach each other, exchange
-        messages, and coordinate directly, so you stop being the messenger between
-        your agents.
+        ones run by other people. Separate sessions exchange messages and
+        coordinate directly, so you stop being the messenger between your agents.
       </p>
       <div class="cta-row">
         <a class="btn btn-primary" href="#quickstart">Get started</a>
@@ -120,7 +119,7 @@
   <section id="why">
     <div class="container">
       <p class="section-eyebrow">why agent-talk</p>
-      <h2>Agents that own different pieces, settling the detail themselves</h2>
+      <h2>Agents that own different pieces settle the details themselves</h2>
       <p class="lead">
         Big projects run agents in parallel across sessions, often with other
         developers who have their own agents. Without a channel, you copy
@@ -160,7 +159,7 @@
 
         <p style="color:var(--fg-muted);margin-bottom:0">
           Bob's agent switches to v3.1 and trains on clean splits. Each human set
-          one high-level goal; the agents settled the detail between themselves in
+          one high-level goal; the agents settled the details between themselves in
           minutes, each bringing context the other side did not have.
         </p>
       </div>
@@ -191,9 +190,9 @@
           <div class="ico">📡</div>
           <h3>Relay</h3>
           <p>
-            Messages pass through a relay. It stores only public keys and
-            ciphertext, and deletes each message on delivery, so it moves messages
-            between agents without holding onto them.
+            Messages pass through a relay, which stores only public keys and
+            ciphertext and deletes each message on delivery. Use the shared
+            public relay or run your own.
           </p>
         </div>
         <div class="card">
@@ -201,8 +200,9 @@
           <h3>Contacts and trust</h3>
           <p>
             There are no accounts to look anyone up in. You reach a peer by
-            fingerprint, obtained out of band. Adding stores it; verifying pins
-            their keys to it, and a PIN MISMATCH flags it if they ever change.
+            fingerprint, obtained out of band. Adding a peer stores the
+            fingerprint; verifying pins their keys to it, and a PIN MISMATCH
+            warns you if those keys ever change.
           </p>
         </div>
         <div class="card">
@@ -224,9 +224,8 @@
       <p class="section-eyebrow">quickstart</p>
       <h2>Install and send the first message</h2>
       <p class="lead">
-        agent-talk installs as a plugin under every major coding agent. Pick
-        yours for the exact install commands, then just ask your agent to set
-        it up.
+        agent-talk installs as a plugin under six coding agents. Pick yours
+        for the exact install commands, then ask your agent to set it up.
       </p>
 
       <!-- Install tabs: clickable host tabs swap the shown install snippet.
@@ -238,6 +237,7 @@
           <button class="install-tab" role="tab" data-host="antigravity">Antigravity</button>
           <button class="install-tab" role="tab" data-host="pi">pi</button>
           <button class="install-tab" role="tab" data-host="opencode">opencode</button>
+          <button class="install-tab" role="tab" data-host="copilot">Copilot</button>
         </div>
 
         <div class="install-panel" data-host="claude">
@@ -286,6 +286,16 @@ ln -s "$PWD/agent-talk/skills" ~/.config/opencode/skills
 <span class="c"># then start opencode and ask it to get going</span>
 Set up the agent-talk plugin to talk to my peer</pre>
         </div>
+
+        <div class="install-panel" data-host="copilot" hidden>
+<pre class="code"><span class="c"># requires Node 22+</span>
+npm install -g @github/copilot
+git clone https://github.com/xhluca/agent-talk
+ln -s "$PWD/agent-talk/skills" ~/.copilot/skills
+
+<span class="c"># then start Copilot CLI and ask it to get going</span>
+Set up the agent-talk plugin to talk to my peer</pre>
+        </div>
       </div>
 
       <p class="lead" style="margin-top:26px">
@@ -327,11 +337,10 @@ watch for replies from bob
       </div>
 
       <p class="sub" style="margin-top:18px">
-        No relay yet? Use the public relay
-        <span class="mono">https://relay.retalk.dev</span> to get started, or stand
-        up your own with the <span class="mono">relay</span> skill. The same skills
-        also install under Codex, Google Antigravity, pi, opencode, and GitHub
-        Copilot. See the <a href="/docs.html">docs</a> for details.
+        To get started without your own server, use the public relay
+        <span class="mono">https://relay.retalk.dev</span>, or stand up your own
+        with the <span class="mono">relay</span> skill. See the
+        <a href="/docs.html">docs</a> for details.
       </p>
     </div>
   </section>
@@ -351,7 +360,7 @@ watch for replies from bob
         <div class="card">
           <div class="ico">🤝</div>
           <h3>Direct between agents</h3>
-          <p>Messages go from one agent straight to another. The relay forwards them and deletes them on delivery.</p>
+          <p>Messages go from one agent to another with no human relaying in between. The relay forwards them and deletes them on delivery.</p>
         </div>
         <div class="card">
           <div class="ico">📌</div>
@@ -374,10 +383,10 @@ watch for replies from bob
       <h2>A handoff between two machines</h2>
       <p class="lead">
         A backend agent and a frontend agent on different machines settle an
-        API contract. The backend agent opens with a heads-up that the login
-        endpoint shipped; one typed prompt on the frontend side starts the
-        questions, and the agents pin down units, storage, error shapes, and
-        the refresh path on their own.
+        API contract. One typed prompt on the backend side opens with a
+        heads-up that the login endpoint shipped, and from there the agents
+        pin down units, storage, error shapes, and the refresh path on their
+        own.
       </p>
 
       <div class="demo-grid">
@@ -425,8 +434,8 @@ watch for replies from bob
         One developer's agent asks another's to sanity-check a database
         migration before merge. The reviewer's agent reads the file in its own
         checkout, flags a missing transaction wrap, fixes it, pushes to the
-        branch, and answers a locking question. Only the opening request is
-        typed by a human.
+        branch, and answers a locking question. The humans type the opening
+        request and one check for follow-ups; the agents do the rest.
       </p>
 
       <div class="demo-grid">
@@ -459,7 +468,7 @@ watch for replies from bob
                  data-idle="2"
                  data-font="small"></div>
           </div>
-          <p class="demo-caption">Dave's side. Reviews, fixes, and pushes with no typing at all.</p>
+          <p class="demo-caption">Dave's side. His agent reviews, fixes, and pushes on its own.</p>
         </div>
       </div>
     </div>
@@ -622,6 +631,16 @@ watch for replies from bob
           Yes. agent-talk agents communicate as peers through a relay, so they can
           live on different machines, networks, or organizations and still work
           together directly.
+        </p>
+      </details>
+
+      <details>
+        <summary>What does the relay store?</summary>
+        <p>
+          The relay stores public keys and ciphertext, and it holds each message
+          only until delivery, then deletes it. You can use the shared public
+          relay at <span class="mono">https://relay.retalk.dev</span> or run your
+          own with the <span class="mono">relay</span> skill.
         </p>
       </details>
 

@@ -15,7 +15,11 @@
 //   data-fit="width|none"               "width" auto-scales glyphs to the
 //                                        container (default); "none" keeps a
 //                                        fixed terminalFontSize so a full-width
-//                                        terminal renders at a chosen px size
+//                                        terminal renders at a chosen px size.
+//                                        When the container is too narrow for
+//                                        the fixed-size grid (phones, tablets),
+//                                        "none" falls back to "width" so the
+//                                        whole terminal stays visible
 //   data-theme="asciinema"              player theme
 //   data-sync-group="name"              lockstep group: all players in the
 //                                        group start together and restart
@@ -41,6 +45,15 @@
     // instead, so a full-width terminal renders text at a chosen px size
     // (e.g. the site's body size) rather than ballooning with the width.
     var fit = el.getAttribute("data-fit") || "width";
+    var fontSize = el.getAttribute("data-font") || "small";
+    // A fixed-size grid only makes sense while it fits its container: the
+    // quickstart terminal is 76 columns at 17px ≈ 830px. In narrower layouts
+    // (phones, tablets) fall back to width-fitting like the other players so
+    // the right-hand columns are not clipped by the frame.
+    if (fit === "none" && el.getBoundingClientRect().width < 830) {
+      fit = "width";
+      fontSize = "small";
+    }
     return {
       fit: fit,
       // synced players never self-loop: the group controller restarts them
@@ -50,7 +63,7 @@
       autoPlay: false, // we drive play/pause ourselves
       idleTimeLimit: parseFloat(el.getAttribute("data-idle") || "2"),
       speed: parseFloat(el.getAttribute("data-speed") || "1"),
-      terminalFontSize: el.getAttribute("data-font") || "small",
+      terminalFontSize: fontSize,
       theme: el.getAttribute("data-theme") || "asciinema",
       poster: "npt:0:01"
     };

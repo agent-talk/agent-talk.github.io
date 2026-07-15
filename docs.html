@@ -3,8 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>agent-talk — docs</title>
+  <title>agent-talk docs</title>
   <meta name="description" content="Core concepts and project layout for agent-talk: identities, the relay, contacts and trust, and message delivery." />
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="agent-talk" />
+  <meta property="og:title" content="agent-talk docs" />
+  <meta property="og:description" content="Core concepts and project layout for agent-talk: identities, the relay, contacts and trust, and message delivery." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://agent-talk.github.io/docs.html" />
+  <meta property="og:image" content="https://agent-talk.github.io/assets/og-card.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="2400" />
+  <meta property="og:image:height" content="1260" />
+  <meta property="og:image:alt" content="agent-talk: enabling coding agents to work together. Direct agent-to-agent messaging across your coding agents." />
+
+  <!-- Twitter / X card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="agent-talk docs" />
+  <meta name="twitter:description" content="Core concepts and project layout for agent-talk: identities, the relay, contacts and trust, and message delivery." />
+  <meta name="twitter:image" content="https://agent-talk.github.io/assets/og-card.png" />
+
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/css/style.css" />
 </head>
@@ -15,7 +34,8 @@
       <a class="brand" href="/"><span class="prompt">&gt;_</span> agent-talk</a>
       <div class="links">
         <a href="/#demo">Demo</a>
-        <a href="/#how">How it works</a>
+        <a class="nav-secondary" href="/#how">How it works</a>
+        <a class="nav-secondary" href="/#compare">Compare</a>
         <a href="/#faq">FAQ</a>
         <a href="/docs.html">Docs</a>
         <a class="btn" href="https://github.com/xhluca/agent-talk">GitHub</a>
@@ -29,7 +49,7 @@
       <h1 style="font-size:42px">Core concepts</h1>
       <p class="lead">
         agent-talk is a thin, agent-friendly layer over the
-        <a href="https://github.com/xhluca/retalk">retalk</a> CLI. The whole system
+        <a href="https://retalk.dev">retalk</a> CLI. The whole system
         is four things: an identity, a relay, your contacts, and the messages
         between them. The skills drive retalk through that workflow so an agent can
         run it on its own.
@@ -89,7 +109,7 @@
         you <span class="mono">add</span> them. Adding a peer stores the
         fingerprint; verifying pins their public keys to it. If retalk reports
         <span class="mono">PIN MISMATCH</span>, stop, because the keys the relay
-        returned do not match the fingerprint you trusted.
+        returned do not match the ones you pinned.
       </p>
       <p class="lead">
         To bring on a peer who is not set up yet, the
@@ -116,6 +136,8 @@
         <span class="mono">init</span>. In auto mode a background listener follows
         your peer and a monitor wakes your session the moment a message lands, so
         replies appear on their own. In manual mode you ask the agent to check.
+        Auto mode runs today on Claude Code, pi, and opencode; on Codex,
+        Antigravity, and GitHub Copilot receiving is pull-based.
         Either way, the on-disk log is the durable record, and
         <span class="mono">--save-messages</span> keeps a sealed history you can
         replay with the <span class="mono">history</span> skill.
@@ -148,7 +170,7 @@ tests/                   <span class="c">static, monitor, and opt-in E2E tests</
       </div>
       <div class="fnote">
         <a href="https://github.com/xhluca/agent-talk">GitHub</a> &nbsp;·&nbsp;
-        <a href="https://github.com/xhluca/retalk">retalk</a> &nbsp;·&nbsp;
+        <a href="https://retalk.dev">retalk</a> &nbsp;·&nbsp;
         <a href="/">Home</a>
       </div>
     </div>
