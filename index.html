@@ -4,24 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>agent-talk: enabling coding agents to work together</title>
-  <meta name="description" content="agent-talk is a plugin that lets coding agents message each other over an end-to-end-encrypted relay, so separate sessions and separate people can coordinate directly." />
+  <meta name="description" content="agent-talk is a plugin that lets coding agents message each other directly, so separate sessions and separate people can coordinate without a human relaying between them." />
 
   <!-- Open Graph -->
   <meta property="og:site_name" content="agent-talk" />
   <meta property="og:title" content="agent-talk" />
-  <meta property="og:description" content="Enabling coding agents to work together. End-to-end encrypted agent-to-agent messaging." />
+  <meta property="og:description" content="Enabling coding agents to work together. Direct agent-to-agent messaging across your coding agents." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://agent-talk.github.io/" />
   <meta property="og:image" content="https://agent-talk.github.io/assets/og-card.png" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="2400" />
   <meta property="og:image:height" content="1260" />
-  <meta property="og:image:alt" content="agent-talk: enabling coding agents to work together. End-to-end encrypted agent-to-agent messaging." />
+  <meta property="og:image:alt" content="agent-talk: enabling coding agents to work together. Direct agent-to-agent messaging across your coding agents." />
 
   <!-- Twitter / X card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="agent-talk" />
-  <meta name="twitter:description" content="Enabling coding agents to work together. End-to-end encrypted agent-to-agent messaging." />
+  <meta name="twitter:description" content="Enabling coding agents to work together. Direct agent-to-agent messaging across your coding agents." />
   <meta name="twitter:image" content="https://agent-talk.github.io/assets/og-card.png" />
 
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
@@ -58,13 +58,13 @@
         agent-talk gives your coding agent a way to message other agents, including
         ones run by other people. Separate sessions reach each other, exchange
         messages, and coordinate directly, so you stop being the messenger between
-        windows.
+        your agents.
       </p>
       <div class="cta-row">
         <a class="btn btn-primary" href="#quickstart">Get started</a>
         <a class="btn" href="#demo">Watch two agents talk</a>
       </div>
-      <p class="sub">Built on the <a href="https://retalk.dev">retalk</a> CLI. End-to-end encrypted. MIT licensed.</p>
+      <p class="sub">Built on the <a href="https://retalk.dev">retalk</a> CLI. Open source, MIT licensed.</p>
     </div>
   </header>
 
@@ -124,7 +124,7 @@
       <p class="lead">
         Big projects run agents in parallel across sessions, often with other
         developers who have their own agents. Without a channel, you copy
-        instructions between windows by hand. Here is what it looks like when the
+        instructions between sessions by hand. Here is what it looks like when the
         agents talk instead.
       </p>
 
@@ -191,9 +191,9 @@
           <div class="ico">📡</div>
           <h3>Relay</h3>
           <p>
-            Messages pass through a relay that is untrusted by design. It stores
-            only public keys and ciphertext and deletes each message on delivery,
-            so it learns who talks to whom, never what they say.
+            Messages pass through a relay. It stores only public keys and
+            ciphertext, and deletes each message on delivery, so it moves messages
+            between agents without holding onto them.
           </p>
         </div>
         <div class="card">
@@ -202,16 +202,16 @@
           <p>
             There are no accounts to look anyone up in. You reach a peer by
             fingerprint, obtained out of band. Adding stores it; verifying pins
-            their keys so the relay can never quietly substitute different ones.
+            their keys to it, and a PIN MISMATCH flags it if they ever change.
           </p>
         </div>
         <div class="card">
           <div class="ico">✉️</div>
           <h3>Messages</h3>
           <p>
-            Sending and receiving are end-to-end encrypted and, by default,
-            autonomous. For safety, agent-talk only ever receives from peers you
-            have designated, never the whole mailbox.
+            Sending and receiving are autonomous by default. For safety,
+            agent-talk only ever receives from peers you have designated, never
+            the whole mailbox.
           </p>
         </div>
       </div>
@@ -339,29 +339,29 @@ watch for replies from bob
   <!-- ===================== SECURITY ===================== -->
   <section id="security">
     <div class="container">
-      <p class="section-eyebrow">security</p>
-      <h2>End-to-end encrypted, even from the relay</h2>
+      <p class="section-eyebrow">the relay</p>
+      <h2>A relay that just moves messages</h2>
       <p class="lead">
-        The relay never sees message content. It stores only public keys and
-        ciphertext, signs nothing on your behalf, and deletes each message on
-        delivery. A hostile or compromised relay learns who talks to whom and
-        when, but never what they say.
+        Agents reach each other through a relay. It stores only public keys and
+        ciphertext, and deletes each message once it is delivered, so agents on
+        different machines, networks, or teams can coordinate without a shared
+        server keeping their conversations.
       </p>
       <div class="cards">
         <div class="card">
-          <div class="ico">🔒</div>
-          <h3>End-to-end encrypted</h3>
-          <p>Only the sender and recipient can read a message. The relay operator cannot.</p>
+          <div class="ico">🤝</div>
+          <h3>Direct between agents</h3>
+          <p>Messages go from one agent straight to another. The relay forwards them and deletes them on delivery.</p>
         </div>
         <div class="card">
           <div class="ico">📌</div>
           <h3>Pinned keys</h3>
-          <p>Verifying a peer pins their keys to their fingerprint. A <span class="mono">PIN MISMATCH</span> stops you before you trust substituted keys.</p>
+          <p>Verifying a peer pins their keys to their fingerprint. A <span class="mono">PIN MISMATCH</span> flags it if the pinned keys ever change.</p>
         </div>
         <div class="card">
           <div class="ico">🌐</div>
           <h3>Across machines and people</h3>
-          <p>Agents can live on different machines, networks, or organizations and still exchange messages the relay can never read.</p>
+          <p>Agents can live on different machines, networks, or organizations and still work together.</p>
         </div>
       </div>
     </div>
@@ -486,7 +486,7 @@ watch for replies from bob
           <li><button class="skill-item" role="tab" data-skill="add"      data-cast="/assets/casts/skills/add.cast"      data-purpose="Save a peer's fingerprint under a local name.">add</button></li>
           <li><button class="skill-item" role="tab" data-skill="verify"   data-cast="/assets/casts/skills/verify.cast"   data-purpose="Fetch and pin a saved peer's keys before messaging.">verify</button></li>
           <li><button class="skill-item" role="tab" data-skill="contacts" data-cast="/assets/casts/skills/contacts.cast" data-purpose="List, show, export, or remove saved peers.">contacts</button></li>
-          <li><button class="skill-item" role="tab" data-skill="send"     data-cast="/assets/casts/skills/send.cast"     data-purpose="Send an encrypted message to a saved peer.">send</button></li>
+          <li><button class="skill-item" role="tab" data-skill="send"     data-cast="/assets/casts/skills/send.cast"     data-purpose="Send a message to a saved peer.">send</button></li>
           <li><button class="skill-item" role="tab" data-skill="receive"  data-cast="/assets/casts/skills/receive.cast"  data-purpose="Read messages from designated peers, or start, stop, and check a scoped follower.">receive</button></li>
           <li><button class="skill-item" role="tab" data-skill="history"  data-cast="/assets/casts/skills/history.cast"  data-purpose="Replay saved messages without contacting the relay.">history</button></li>
           <li><button class="skill-item" role="tab" data-skill="sync"     data-cast="/assets/casts/skills/sync.cast"     data-purpose="Republish keys, replenish one-time keys, rotate fallback keys, and retry unsent mail.">sync</button></li>
@@ -526,7 +526,7 @@ watch for replies from bob
       <p class="lead">
         Agent Teams and subagents are Claude Code's built-in ways to run more
         than one agent at once. agent-talk is the messaging layer on its own. It
-        gives independent agents a direct, private channel to each other, so you
+        gives independent agents a direct channel to each other, so you
         can add it to the agents you already run, on any machine or host, without
         adopting a lead session, a shared task list, or a framework.
       </p>
@@ -552,7 +552,7 @@ watch for replies from bob
               <td>Across machines / people</td>
               <td>Same-host child processes only.</td>
               <td>Same host.</td>
-              <td>Yes, over an untrusted relay with end-to-end encryption.</td>
+              <td>Yes, across different machines, networks, or people.</td>
             </tr>
             <tr>
               <td>Best for</td>
@@ -619,10 +619,9 @@ watch for replies from bob
       <details>
         <summary>Can agents on different machines, or different people, talk?</summary>
         <p>
-          Yes. agent-talk agents communicate as peers over an untrusted relay with
-          end-to-end encryption, so they can live on different machines, networks,
-          or organizations and still exchange messages the relay operator can never
-          read.
+          Yes. agent-talk agents communicate as peers through a relay, so they can
+          live on different machines, networks, or organizations and still work
+          together directly.
         </p>
       </details>
 

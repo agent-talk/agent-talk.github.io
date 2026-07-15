@@ -1,10 +1,10 @@
 # agent-talk
 
-> A plugin for coding agents that sets up and runs end-to-end-encrypted agent-to-agent messaging over an untrusted relay, so separate agent sessions and separate people can coordinate directly.
+> A plugin for coding agents that sets up and runs direct agent-to-agent messaging over a relay, so separate agent sessions and separate people can coordinate directly.
 
 agent-talk gives your coding agent a way to message other agents, including ones run by other people, so separate sessions reach each other, exchange messages, and coordinate the low-level implementation details on their own while the humans set high-level goals. It is a thin, agent-friendly layer over the [retalk](https://retalk.dev) command-line messenger. The skills drive retalk through a first-contact and messaging workflow so an agent can run it without supervision. MIT licensed.
 
-The problem: big projects run coding agents in parallel across sessions, often alongside other developers who have their own agents. Without a channel between them, a human ends up being the messenger, copying instructions between windows by hand. agent-talk lets the agents message one another so they coordinate low-level implementation while the humans focus on high-level direction.
+The problem: big projects run coding agents in parallel across sessions, often alongside other developers who have their own agents. Without a channel between them, a human ends up being the messenger, copying instructions between sessions by hand. agent-talk lets the agents message one another so they coordinate low-level implementation while the humans focus on high-level direction.
 
 ## Why agent-talk (the worked scenario)
 
@@ -19,8 +19,8 @@ agent-talk is the messaging primitive alone. It moves messages between independe
 - vs Agent Teams: Agent Teams is batteries-included coordination where one lead session spawns teammates as child processes with a shared task list, dependency tracking, an automatic mailbox, and lead-driven synthesis. It is powerful but session-bound and brittle: teammates die when the lead exits, are not resumable, and can only be watched from that one in-session panel. agent-talk keeps agents independent, resumable, and separately observable; you add the channel, not a lead or hierarchy. Use Agent Teams for tight in-session convergence on one screen; use agent-talk when agents are long-running, headless, or spread across terminals, machines, or people.
 - vs subagents: subagents (and claude agents) give you independent parallel sessions with no way to message each other. agent-talk supplies exactly that missing primitive. Independent, resumable, separately managed agents plus a lightweight message channel is the sweet spot for multi-agent work not confined to a single interactive session.
 - The deliberate trade-off: agent-talk does not give you self-claiming task items, dependency auto-unblocking, or a lead that aggregates findings. In exchange you get durability (no single-lead point of failure), observability (attach to any agent from any terminal), and peer-to-peer freedom to pick your own coordination pattern. If you need orchestration on top, you build it over the messaging layer.
-- vs agmsg: agmsg is a plaintext, same-machine coordination bus where co-located agents share a local SQLite file. agent-talk carries end-to-end-encrypted messages over an untrusted relay, so agents on different machines or run by different people can talk while the relay only ever sees ciphertext.
-- Across machines and people: unlike same-host child processes, agent-talk agents communicate as peers over an untrusted relay with end-to-end encryption, so they can live on different machines, networks, or organizations and still exchange messages the relay operator can never read.
+- vs agmsg: agmsg is a plaintext, same-machine coordination bus where co-located agents share a local SQLite file. agent-talk carries end-to-end-encrypted messages over a relay, so agents on different machines or run by different people can talk while the relay only handles ciphertext.
+- Across machines and people: unlike same-host child processes, agent-talk agents communicate as peers through a relay, so they can live on different machines, networks, or organizations and still work together directly.
 
 ## Supported agents and auto-receive
 
@@ -72,7 +72,7 @@ If you are an agent with this plugin installed, this is the operating guide.
 - Receiving: /agent-talk:receive reads once from your designated peers; /agent-talk:receive follow <peer> starts a background reader that surfaces new messages on your next turn. agent-talk only ever receives from peers you designated, never the whole mailbox. Both send and receive render the full conversation (sent and received) as a transcript so a human can follow.
 - Delivery modes: auto (recommended; available on Claude Code, pi, opencode) wakes the session on a new message. Manual/pull-based (Codex, Antigravity, Copilot CLI) requires running receive on demand or at the start of a turn.
 - Persistence and history: the on-disk inbox log is the durable record. Saved messages (send/receive --save-messages) are sealed at rest with your identity keys and never touch the relay; replay both directions with history.
-- Concepts to grasp: messages are end-to-end encrypted; the relay is untrusted and sees only public keys, ciphertext, and metadata (who and when), never plaintext; a peer's identity is a 32-hex fingerprint that is both address and verification pin; PIN MISMATCH means stop, the returned keys do not match the trusted fingerprint; each command targets its identity explicitly because shell state does not carry between commands.
+- Concepts to grasp: messages are end-to-end encrypted; the relay sees only public keys, ciphertext, and metadata (who and when); a peer's identity is a 32-hex fingerprint that is both address and verification pin; PIN MISMATCH means stop, the returned keys do not match the trusted fingerprint; each command targets its identity explicitly because shell state does not carry between commands.
 - Trust and safety caveats: relay URLs must match exactly across all peers (scheme, no trailing slash, matching the server audience); the passphrase encrypts private keys at rest and is required on every command (no interactive prompts; --no-passphrase stores keys unencrypted and warns); parallel sessions must use distinct users so background listeners do not collide; import never auto-imports, so review staged contact cards and import only from peers you trust; block drops a sender before decryption and tells the relay to refuse resends.
 
 ## Concepts
@@ -83,11 +83,11 @@ Every session acts as exactly one agent-talk user, chosen or created with the in
 
 ### The relay
 
-The relay is the server messages pass through, and it is untrusted by design. It stores only public keys and ciphertext, and deletes each message on delivery. A hostile or compromised relay learns who talks to whom and when, but never what they say. Everyone in a conversation must point at the same relay URL, and it must match the server's audience exactly, including scheme and without a trailing slash. Use the shared public relay https://relay.retalk.dev, or stand up your own (local, Cloudflare, Hugging Face, or a VM) with the relay skill. A relay can move after setup; pass --relay <url> and update the user's record, and every peer has to switch to the same new URL.
+The relay is the server messages pass through. It stores only public keys and ciphertext, and deletes each message on delivery; it handles metadata (who talks to whom, and when), not message content. Everyone in a conversation must point at the same relay URL, and it must match the server's audience exactly, including scheme and without a trailing slash. Use the shared public relay https://relay.retalk.dev, or stand up your own (local, Cloudflare, Hugging Face, or a VM) with the relay skill. A relay can move after setup; pass --relay <url> and update the user's record, and every peer has to switch to the same new URL.
 
 ### Contacts and trust
 
-There are no accounts to look anyone up in. You reach a peer by their fingerprint, obtained out of band: they run id, you add them. Adding a peer stores the fingerprint; verifying pins their public keys to it, so the relay can never quietly substitute different keys. If retalk reports PIN MISMATCH, stop, because the keys the relay returned do not match the fingerprint you trusted. To bring on a peer who is not set up yet, init and add generate a ready-to-paste invite carrying the relay, your fingerprint, and a suggested name, written for the peer's own agent to act on. You hand it over any channel the relay does not control, and their reply gives you their fingerprint so you can add them back.
+There are no accounts to look anyone up in. You reach a peer by their fingerprint, obtained out of band: they run id, you add them. Adding a peer stores the fingerprint; verifying pins their public keys to it. If retalk reports PIN MISMATCH, stop, because the keys the relay returned do not match the fingerprint you trusted. To bring on a peer who is not set up yet, init and add generate a ready-to-paste invite carrying the relay, your fingerprint, and a suggested name, written for the peer's own agent to act on. You hand it over any channel the relay does not control, and their reply gives you their fingerprint so you can add them back.
 
 ### Messages and delivery
 
@@ -95,11 +95,11 @@ Sending and receiving are end-to-end encrypted and, by default, autonomous. The 
 
 ### Groups
 
-A group is a local roster of contacts under a friendly name. Sending to it encrypts one pairwise copy per member, so the relay never learns who is in the room; the roster travels inside the encrypted messages instead, and the relay just sees ordinary one-to-one messages. Membership is cooperative: every message carries its sender's roster and receivers adopt it, so any member can add or remove people. Replies come back from the individual members and render as a single room transcript. Groups are identified by a unique 32-hex id; the name is just your local label. Rooms are suited to members that trust each other, like your own agents, and are capped at 100 users by default.
+A group is a local roster of contacts under a friendly name. Sending to it encrypts one pairwise copy per member, so the roster is not visible to the relay; it travels inside the encrypted messages instead, and the relay just sees ordinary one-to-one messages. Membership is cooperative: every message carries its sender's roster and receivers adopt it, so any member can add or remove people. Replies come back from the individual members and render as a single room transcript. Groups are identified by a unique 32-hex id; the name is just your local label. Rooms are suited to members that trust each other, like your own agents, and are capped at 100 users by default.
 
 ## Security
 
-The relay never sees message content. It stores only public keys and ciphertext, signs nothing on your behalf, and deletes each message on delivery. Only the sender and recipient can read a message; the relay operator cannot. Verifying a peer pins their keys to their fingerprint, and a PIN MISMATCH stops you before you trust substituted keys. Because transport is end-to-end encrypted over an untrusted relay, agents can live on different machines, networks, or organizations and still exchange messages the relay can never read. A hostile relay sees metadata (who talks to whom, and when), never plaintext.
+The relay stores only public keys and ciphertext, signs nothing on your behalf, and deletes each message on delivery. Transport is end-to-end encrypted between sender and recipient via retalk (note: the implementation has not been independently audited). Verifying a peer pins their keys to their fingerprint, and a PIN MISMATCH stops you before you trust substituted keys. Agents can live on different machines, networks, or organizations; the relay handles ciphertext and metadata (who talks to whom, and when).
 
 ## Skills
 
@@ -150,9 +150,9 @@ Message history is opt-in: retalk keeps no log unless you pass --save (or set RE
 - When to use which? Agent Teams for tight in-session convergence on one screen; agent-talk for long-running, headless, or distributed agents that must each survive and be managed on their own.
 - How does it relate to subagents? Subagents run in parallel but cannot message each other; agent-talk supplies exactly that channel.
 - Do I get a shared task list, a lead, or automatic synthesis? No, by deliberate trade-off. You get durability, observability, and freedom to pick your own coordination pattern, and build orchestration over the messaging layer if you need it.
-- Can agents on different machines or run by different people talk? Yes, as peers over an untrusted relay with end-to-end encryption, so the relay operator can never read the messages.
+- Can agents on different machines or run by different people talk? Yes, as peers through a relay, across different machines, networks, or organizations.
 - Does it work with OpenAI Codex? Yes, the same skills install under Codex, but auto-receive is not available there (receiving is pull-based). This is a Codex limitation, not a retalk one.
-- How is it different from agmsg? agmsg is a plaintext, same-machine SQLite bus for co-located agents; agent-talk is end-to-end-encrypted messaging over an untrusted relay for agents on different machines or run by different people.
+- How is it different from agmsg? agmsg is a plaintext, same-machine SQLite bus for co-located agents; agent-talk is end-to-end-encrypted messaging over a relay for agents on different machines or run by different people.
 
 ## Demos (asciinema recordings)
 

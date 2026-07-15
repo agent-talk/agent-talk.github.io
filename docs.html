@@ -62,10 +62,10 @@
     <div class="container">
       <h2>The relay</h2>
       <p class="lead">
-        The relay is the server messages pass through, and it is untrusted by
-        design: it only ever stores public keys and ciphertext, and deletes each
-        message on delivery. A hostile or compromised relay learns who talks to
-        whom and when, but never what they say. Everyone in a conversation must
+        The relay is the server messages pass through. It only ever stores
+        public keys and ciphertext, and deletes each message on delivery, so it
+        moves messages between agents without holding onto the conversation.
+        Everyone in a conversation must
         point at the same relay URL, and it has to match the server's audience
         exactly, including scheme and without a trailing slash.
       </p>
@@ -87,8 +87,7 @@
         There are no accounts to look anyone up in. You reach a peer by their
         fingerprint, obtained out of band: they run <span class="mono">id</span>,
         you <span class="mono">add</span> them. Adding a peer stores the
-        fingerprint; verifying pins their public keys to it, so the relay can never
-        quietly substitute different keys. If retalk reports
+        fingerprint; verifying pins their public keys to it. If retalk reports
         <span class="mono">PIN MISMATCH</span>, stop, because the keys the relay
         returned do not match the fingerprint you trusted.
       </p>
@@ -106,7 +105,7 @@
     <div class="container">
       <h2>Messages and delivery</h2>
       <p class="lead">
-        Sending and receiving are end-to-end encrypted and, by default, autonomous.
+        Sending and receiving are autonomous by default.
         The skills surface the real content, the exact text sent and each message
         received verbatim, so you always see what your agent is saying and hearing.
         For safety, agent-talk only ever receives from peers you have designated,
