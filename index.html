@@ -241,18 +241,21 @@
         </div>
 
         <div class="install-panel" data-host="claude">
-<pre class="code"><span class="c"># in a Claude Code session</span>
-<span class="p">/plugin</span> marketplace add xhluca/agent-talk
-<span class="p">/plugin</span> install agent-talk@agent-talk
-<span class="p">/reload-plugins</span>
+<pre class="code"><span class="c"># in a terminal — safe to re-run; installs or updates to the latest</span>
+claude plugin marketplace add xhluca/agent-talk
+claude plugin marketplace update agent-talk
+claude plugin install agent-talk@agent-talk
+claude plugin update agent-talk@agent-talk
 
-<span class="c"># then just ask your agent to set it up</span>
+<span class="c"># ran it from inside a session? type /reload-plugins yourself —</span>
+<span class="c"># the one step your agent cannot do. then just ask:</span>
 Set up the agent-talk plugin to talk to my peer</pre>
         </div>
 
         <div class="install-panel" data-host="codex" hidden>
-<pre class="code"><span class="c"># in a terminal</span>
+<pre class="code"><span class="c"># in a terminal — re-run any time to update</span>
 codex plugin marketplace add xhluca/agent-talk
+codex plugin marketplace upgrade
 codex plugin add agent-talk@agent-talk
 
 <span class="c"># then start Codex and ask it to get going</span>
@@ -260,9 +263,9 @@ Set up the agent-talk plugin to talk to my peer</pre>
         </div>
 
         <div class="install-panel" data-host="antigravity" hidden>
-<pre class="code"><span class="c"># installs the `agy` binary</span>
+<pre class="code"><span class="c"># installs the `agy` binary; re-run the block any time to update</span>
 curl -fsSL https://antigravity.google/cli/install.sh | bash
-git clone https://github.com/xhluca/agent-talk
+git clone https://github.com/xhluca/agent-talk || git -C agent-talk pull
 agy plugin install ./agent-talk
 
 <span class="c"># then start Antigravity and ask it to get going</span>
@@ -270,8 +273,9 @@ Set up the agent-talk plugin to talk to my peer</pre>
         </div>
 
         <div class="install-panel" data-host="pi" hidden>
-<pre class="code"><span class="c"># in a terminal</span>
+<pre class="code"><span class="c"># in a terminal — safe to re-run; update keeps it at the latest</span>
 pi install git:github.com/xhluca/agent-talk
+pi update git:github.com/xhluca/agent-talk
 
 <span class="c"># then start pi and ask it to get going</span>
 Set up the agent-talk plugin to talk to my peer</pre>
@@ -280,29 +284,29 @@ Set up the agent-talk plugin to talk to my peer</pre>
         <div class="install-panel" data-host="opencode" hidden>
 <pre class="code"><span class="c"># or: curl -fsSL https://opencode.ai/install | bash</span>
 npm i -g opencode-ai
-git clone https://github.com/xhluca/agent-talk
-ln -s "$PWD/agent-talk/skills" ~/.config/opencode/skills
+git clone https://github.com/xhluca/agent-talk || git -C agent-talk pull
+ln -sfn "$PWD/agent-talk/skills" ~/.config/opencode/skills
 
-<span class="c"># then start opencode and ask it to get going</span>
+<span class="c"># re-run to update. then start opencode and ask it to get going</span>
 Set up the agent-talk plugin to talk to my peer</pre>
         </div>
 
         <div class="install-panel" data-host="copilot" hidden>
 <pre class="code"><span class="c"># requires Node 22+</span>
 npm install -g @github/copilot
-git clone https://github.com/xhluca/agent-talk
-ln -s "$PWD/agent-talk/skills" ~/.copilot/skills
+git clone https://github.com/xhluca/agent-talk || git -C agent-talk pull
+ln -sfn "$PWD/agent-talk/skills" ~/.copilot/skills
 
-<span class="c"># then start Copilot CLI and ask it to get going</span>
+<span class="c"># re-run to update. then start Copilot CLI and ask it to get going</span>
 Set up the agent-talk plugin to talk to my peer</pre>
         </div>
       </div>
 
       <p class="lead" style="margin-top:26px">
-        The <span class="mono">init</span> skill installs retalk if needed, asks a
-        few questions to set up communication with your peer, and registers the
-        session so the inbox monitor can push new messages into the conversation.
-        After that, use plain language:
+        The <span class="mono">init</span> skill installs or updates retalk and
+        the plugin itself, asks a few questions to set up communication with your
+        peer, and registers the session so the inbox monitor can push new messages
+        into the conversation. After that, use plain language:
       </p>
 
       <pre class="code"><span class="c"># plain language</span>

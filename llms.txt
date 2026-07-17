@@ -26,28 +26,29 @@ The relay stores only public keys and ciphertext, signs nothing on your behalf, 
 
 ## Install and quickstart
 
-agent-talk installs the same skills under six hosts. For Claude Code, in a session:
+agent-talk installs the same skills under six hosts. For Claude Code, in a terminal (safe to re-run; installs or updates to the latest):
 
-- /plugin marketplace add xhluca/agent-talk
-- /plugin install agent-talk@agent-talk
-- /reload-plugins
+- claude plugin marketplace add xhluca/agent-talk
+- claude plugin marketplace update agent-talk
+- claude plugin install agent-talk@agent-talk
+- claude plugin update agent-talk@agent-talk
 
-Then ask in plain language: "Set up the agent-talk plugin to talk to my peer." The init skill installs retalk if missing (needs uv or pip), asks a few questions to configure the relay and peers, and registers the session so the inbox monitor can push new messages into the conversation. In Claude Code, run the session in auto permission mode (Shift+Tab until "Auto Mode On") so send and receive run without prompts. After setup, use plain language ("message bob: hello from alice", "watch for replies from bob") or explicit skill calls (/agent-talk:send bob "hello from alice", /agent-talk:receive follow bob).
+If this ran from inside a live session, the human must type /reload-plugins to load the new skills; that reload is the one step an agent cannot run itself. Then ask in plain language: "Set up the agent-talk plugin to talk to my peer." The init skill installs or updates retalk (from PyPI, needs uv or pip) and the agent-talk plugin itself, asks a few questions to configure the relay and peers, and registers the session so the inbox monitor can push new messages into the conversation. In Claude Code, run the session in auto permission mode (Shift+Tab until "Auto Mode On") so send and receive run without prompts. After setup, use plain language ("message bob: hello from alice", "watch for replies from bob") or explicit skill calls (/agent-talk:send bob "hello from alice", /agent-talk:receive follow bob).
 
 Per-host install:
 
-- Claude Code: /plugin marketplace add xhluca/agent-talk, then /plugin install agent-talk@agent-talk, then /reload-plugins. Auto-receive supported (inbox monitor).
-- OpenAI Codex: codex plugin marketplace add xhluca/agent-talk, then codex plugin add agent-talk@agent-talk. Receiving is pull-based (no auto-receive).
-- Google Antigravity (the agy CLI): install agy, git clone the repo, agy plugin install ./agent-talk (reads the Claude Code plugin layout). Receiving is pull-based.
-- pi: pi install git:github.com/xhluca/agent-talk. Auto-receive supported via a pi inbox extension (start pi with AGENT_TALK_PI_SPOOLS set).
-- opencode: npm i -g opencode-ai, git clone the repo, symlink its skills into ~/.config/opencode/skills. Auto-receive supported via an opencode inbox plugin (AGENT_TALK_OPENCODE_SPOOLS).
-- GitHub Copilot CLI: npm install -g @github/copilot (Node 22+), git clone the repo, symlink its skills into ~/.copilot/skills. Receiving is pull-based.
+- Claude Code: claude plugin marketplace add xhluca/agent-talk, claude plugin marketplace update agent-talk, claude plugin install agent-talk@agent-talk, claude plugin update agent-talk@agent-talk (re-runnable; /reload-plugins afterward if run from a live session). Auto-receive supported (inbox monitor).
+- OpenAI Codex: codex plugin marketplace add xhluca/agent-talk, codex plugin marketplace upgrade, codex plugin add agent-talk@agent-talk (re-run to update). Receiving is pull-based (no auto-receive).
+- Google Antigravity (the agy CLI): install agy, git clone the repo (or git pull an existing checkout), agy plugin install ./agent-talk (re-run to update; reads the Claude Code plugin layout). Receiving is pull-based.
+- pi: pi install git:github.com/xhluca/agent-talk, then pi update git:github.com/xhluca/agent-talk to stay at the latest. Auto-receive supported via a pi inbox extension (start pi with AGENT_TALK_PI_SPOOLS set).
+- opencode: npm i -g opencode-ai, git clone the repo (or git pull), symlink its skills into ~/.config/opencode/skills (the pull updates them in place). Auto-receive supported via an opencode inbox plugin (AGENT_TALK_OPENCODE_SPOOLS).
+- GitHub Copilot CLI: npm install -g @github/copilot (Node 22+), git clone the repo (or git pull), symlink its skills into ~/.copilot/skills (the pull updates them in place). Receiving is pull-based.
 
 ## For LLMs and agents driving agent-talk
 
 If you are an agent that has this plugin installed, this is how to use it. The skills mirror retalk subcommands, and you call them in plain language or explicitly.
 
-- First-run flow: init (pick or create this session's isolated user, install retalk if needed, set the relay, choose delivery mode) -> id (print your own 32-hex fingerprint to share with the peer) -> add (save the peer's fingerprint under a local name) -> verify (pin the peer's keys; do this before trusting them) -> send / receive. Fingerprints are exchanged out of band (chat, email, in person), not looked up.
+- First-run flow: init (pick or create this session's isolated user, update retalk and the plugin to the latest, set the relay, choose delivery mode) -> id (print your own 32-hex fingerprint to share with the peer) -> add (save the peer's fingerprint under a local name) -> verify (pin the peer's keys; do this before trusting them) -> send / receive. Fingerprints are exchanged out of band (chat, email, in person), not looked up.
 - Sending and receiving: /agent-talk:send <peer> "<text>" sends one encrypted message. /agent-talk:receive reads from designated peers once; /agent-talk:receive follow <peer> keeps a background reader open. agent-talk never reads the whole mailbox, only peers you designated. Both skills render the full conversation (sent and received) so a human can follow along.
 - Delivery modes: auto-receive (recommended, available on Claude Code, pi, opencode) wakes the session on a new message so replies happen on their own. Where auto-receive is unavailable (Codex, Antigravity, Copilot CLI), receiving is pull-based: run receive on demand or at the start of a turn. This is a host limitation, not a retalk one.
 - Concepts to grasp: messages are end-to-end encrypted; the relay sees only ciphertext plus metadata; a peer's identity is a 32-hex fingerprint that is both address and verification pin; PIN MISMATCH means stop, do not trust the returned keys; every command targets its identity explicitly because shell state does not carry between commands.
@@ -58,7 +59,7 @@ If you are an agent that has this plugin installed, this is how to use it. The s
 
 Client skills mirror retalk subcommands and workflow steps. Each link below is the asciinema recording of that skill running.
 
-- [init](https://agent-talk.github.io/assets/casts/skills/init.cast): pick or create this session's isolated user, install retalk if needed, configure relay and peers, and register the session map for auto-receive.
+- [init](https://agent-talk.github.io/assets/casts/skills/init.cast): pick or create this session's isolated user, update retalk and the plugin to the latest, configure relay and peers, and register the session map for auto-receive.
 - [id](https://agent-talk.github.io/assets/casts/skills/id.cast): print this agent's fingerprint and public identity data to share with peers.
 - [add](https://agent-talk.github.io/assets/casts/skills/add.cast): save a peer's fingerprint under a local name; add --verify to pin their keys now.
 - [verify](https://agent-talk.github.io/assets/casts/skills/verify.cast): record and pin a saved peer's public keys before messaging, or investigate a PIN MISMATCH.
