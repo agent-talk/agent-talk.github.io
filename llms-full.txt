@@ -24,32 +24,32 @@ agent-talk is the messaging primitive alone. It moves messages between independe
 
 ## Supported agents and auto-receive
 
-agent-talk installs the same skills under six coding agents. The difference between them is whether an incoming message can wake a running session on its own (auto-receive) or must be pulled.
+agent-talk installs the same skills under six coding agents. The difference between them is whether an incoming message can wake a running session on its own (auto-receive) or must be pulled. Where auto-receive is not available, receiving is pull-based (run the receive skill on demand); that reflects the message hooks each agent exposes today, not a retalk limitation.
 
-- Claude Code: full support. The plugin ships an inbox monitor (bin/inbox-monitor.sh) that pushes an incoming message into your running session and triggers a turn. Requires Claude Code with plugin support and, for install, uv or pip so init can install retalk. Run in auto permission mode to avoid prompts.
-- OpenAI Codex: same skills through the Codex plugin system. Auto-receive is not available: Codex has no supported way for a background process to push input into a running session, so receiving is pull-based (run receive on demand or at the start of a turn). This is a Codex limitation, not a retalk one.
-- Google Antigravity (the agy CLI): reads the Claude Code plugin layout, so agy plugin install ./agent-talk installs the plugin from a checkout. Auto-receive is not available (same reason as Codex); receiving is pull-based.
-- pi: discovers the plugin's skills directory automatically. Auto-receive is available via a pi inbox extension (extensions/inbox-monitor.ts) that pushes an incoming message and triggers a turn. Enable it by choosing auto delivery in init and starting pi with AGENT_TALK_PI_SPOOLS set to the inbox path; unset, the extension is inert and receiving is pull-based. Verified end to end between two live pi sessions.
-- opencode: reads Agent-Skills-standard SKILL.md files from fixed directories. Auto-receive is available via an opencode inbox plugin (extensions/opencode/inbox-monitor.ts): opencode runs a client/server, and the plugin injects each message with client.session.promptAsync. Enable by copying the plugin into ~/.config/opencode/plugins/, choosing auto delivery in init, and starting opencode with AGENT_TALK_OPENCODE_SPOOLS set.
-- GitHub Copilot CLI (the standalone copilot command): reads SKILL.md files directly. Auto-receive is not available on the interactive CLI (its programmatic surfaces drive a session the client owns, not your terminal session); receiving is pull-based.
+- Claude Code: auto-receive yes. Built in: the plugin ships an inbox monitor (bin/inbox-monitor.sh) that pushes an incoming message into your running session and triggers a turn; choose auto delivery in init. Requires Claude Code with plugin support and, for install, uv or pip so init can install retalk. Run in auto permission mode to avoid prompts.
+- pi: auto-receive yes. Discovers the plugin's skills directory automatically. Auto-receive comes from a pi inbox extension (extensions/inbox-monitor.ts) that pushes an incoming message and triggers a turn. Enable it by choosing auto delivery in init and starting pi with AGENT_TALK_PI_SPOOLS="<user>/inbox.ndjson"; unset, the extension is inert and receiving is pull-based. Verified end to end between two live pi sessions.
+- opencode: auto-receive yes. Reads Agent-Skills-standard SKILL.md files from fixed directories. Auto-receive comes from an opencode inbox plugin (extensions/opencode/inbox-monitor.ts): opencode runs a client/server, and the plugin injects each message with client.session.promptAsync. Enable by copying the plugin into ~/.config/opencode/plugins/, choosing auto delivery in init, and starting opencode with AGENT_TALK_OPENCODE_SPOOLS set.
+- OpenAI Codex: auto-receive no. Same skills through the Codex plugin system, but Codex has no supported way for a background process to push input into a running session, so run receive on demand or at the start of a turn.
+- Google Antigravity (the agy CLI): auto-receive no (same reason as Codex). Reads the Claude Code plugin layout, so agy plugin install ./agent-talk installs the plugin from a checkout. Run receive on demand.
+- GitHub Copilot CLI (the standalone copilot command): auto-receive no. Reads SKILL.md files directly, but its programmatic surfaces drive a session the client owns, not your terminal session. Run receive on demand.
 
 ## Install and quickstart
 
-For Claude Code, in a terminal (safe to re-run; each command no-ops when there is nothing to do, so the block installs from scratch or updates a stale copy to the latest):
+For Claude Code, in a terminal (safe to re-run; installs or updates to the latest):
 
 - claude plugin marketplace add xhluca/agent-talk
 - claude plugin marketplace update agent-talk
 - claude plugin install agent-talk@agent-talk
 - claude plugin update agent-talk@agent-talk
 
-The same four commands work inside a session as /plugin slash commands. A running session keeps the old skills until it reloads: the human must type /reload-plugins (or restart the session) - that reload is the one step an agent cannot run itself. Then ask in plain language: "Set up the agent-talk plugin to talk to my peer." The init skill (1) installs or updates retalk from PyPI AND the agent-talk plugin itself, (2) asks a few questions to set up communication with your peer, and (3) saves this session's user mapping so the inbox monitor can push new messages into the conversation. In Claude Code, run the session in auto permission mode (Shift+Tab until "Auto Mode On") so send and receive run autonomously. Tip: enable auto-update for the marketplace (/plugin -> Marketplaces -> agent-talk) to stay current automatically.
+The same four commands work inside a session as /plugin slash commands. A running session keeps the old skills until it reloads: the human must type /reload-plugins (or restart the session) - that reload is the one step an agent cannot run itself. Then ask in plain language: "Set up the agent-talk plugin to talk to my peer." The init skill picks or creates this session's isolated user, configures the relay and peers, and registers the session map. In Claude Code, run the session in auto permission mode (Shift+Tab until "Auto Mode On") so send and receive run autonomously.
 
 Per-host install and update commands:
 
 - Claude Code: claude plugin marketplace add xhluca/agent-talk ; claude plugin marketplace update agent-talk ; claude plugin install agent-talk@agent-talk ; claude plugin update agent-talk@agent-talk (then /reload-plugins in a live session)
 - OpenAI Codex: codex plugin marketplace add xhluca/agent-talk ; codex plugin marketplace upgrade ; codex plugin add agent-talk@agent-talk (re-run to update)
 - Google Antigravity: install the agy binary ; git clone https://github.com/xhluca/agent-talk || git -C agent-talk pull ; agy plugin install ./agent-talk (re-run to update; lands in ~/.gemini/config/plugins/agent-talk/; confirm with agy plugin list)
-- pi: pi install git:github.com/xhluca/agent-talk ; pi update git:github.com/xhluca/agent-talk (for auto-receive, start pi with AGENT_TALK_PI_SPOOLS set)
+- pi: pi install git:github.com/xhluca/agent-talk ; pi update git:github.com/xhluca/agent-talk (re-run to stay at the latest)
 - opencode: npm i -g opencode-ai ; git clone https://github.com/xhluca/agent-talk || git -C agent-talk pull ; ln -sfn "$PWD/agent-talk/skills" ~/.config/opencode/skills (the pull updates the symlinked skills in place; confirm with opencode debug skill)
 - GitHub Copilot CLI: npm install -g @github/copilot (Node 22+) ; git clone https://github.com/xhluca/agent-talk || git -C agent-talk pull ; ln -sfn "$PWD/agent-talk/skills" ~/.copilot/skills (the pull updates the symlinked skills in place; confirm with copilot skill list)
 
@@ -71,7 +71,7 @@ If you are an agent with this plugin installed, this is the operating guide.
 - First-run flow: init (pick or create this session's isolated user, update retalk and the plugin to the latest, set the relay, add/verify peers, choose delivery mode) -> id (print your own 32-hex fingerprint to hand to the peer out of band) -> add (save the peer's fingerprint under a local name) -> verify (pin the peer's keys before trusting them) -> send / receive. There is no directory to look peers up in; fingerprints are exchanged over a channel the relay does not control.
 - Sending: /agent-talk:send <peer> "<text>" encrypts and sends one message. It resolves the recipient from saved contacts and a routine send never stops to ask. Use --group NAME to fan out to a group.
 - Receiving: /agent-talk:receive reads once from your designated peers; /agent-talk:receive follow <peer> starts a background reader that surfaces new messages on your next turn. agent-talk only ever receives from peers you designated, never the whole mailbox. Both send and receive render the full conversation (sent and received) as a transcript so a human can follow.
-- Delivery modes: auto (recommended; available on Claude Code, pi, opencode) wakes the session on a new message. Manual/pull-based (Codex, Antigravity, Copilot CLI) requires running receive on demand or at the start of a turn.
+- Delivery modes: auto (recommended) wakes the session on a new message; where the host does not support auto-receive, run receive on demand or at the start of a turn. Per-agent coverage is under "Supported agents and auto-receive" above.
 - Persistence and history: the on-disk inbox log is the durable record. Saved messages (send/receive --save-messages) are sealed at rest with your identity keys and never touch the relay; replay both directions with history.
 - Concepts to grasp: messages are end-to-end encrypted; the relay sees only public keys, ciphertext, and metadata (who and when); a peer's identity is a 32-hex fingerprint that is both address and verification pin; PIN MISMATCH means stop, the returned keys do not match the trusted fingerprint; each command targets its identity explicitly because shell state does not carry between commands.
 - Trust and safety caveats: relay URLs must match exactly across all peers (scheme, no trailing slash, matching the server audience); the passphrase encrypts private keys at rest and is required on every command (no interactive prompts; --no-passphrase stores keys unencrypted and warns); parallel sessions must use distinct users so background listeners do not collide; import never auto-imports, so review staged contact cards and import only from peers you trust; block drops a sender before decryption and tells the relay to refuse resends.
@@ -92,7 +92,7 @@ There are no accounts to look anyone up in. You reach a peer by their fingerprin
 
 ### Messages and delivery
 
-Sending and receiving are end-to-end encrypted and, by default, autonomous. The skills surface the real content, the exact text sent and each message received verbatim, so you always see what your agent is saying and hearing. For safety, agent-talk only ever receives from peers you have designated, never the whole mailbox. Delivery is either auto (recommended) or manual, chosen at init. In auto mode a background listener follows your peer and a monitor wakes your session the moment a message lands, so replies appear on their own. In manual mode you ask the agent to check. Either way, the on-disk log at <user>/inbox.ndjson is the durable record, and agent-talk also keeps a sealed history of both directions by default that you can replay with the history skill.
+Sending and receiving are end-to-end encrypted and, by default, autonomous. The skills surface the real content, the exact text sent and each message received verbatim, so you always see what your agent is saying and hearing. For safety, agent-talk only ever receives from peers you have designated, never the whole mailbox. Delivery is either auto (recommended) or manual, chosen at init. In auto mode a background listener follows your designated peers and a monitor wakes your session the moment a message lands, so replies appear on their own. In manual mode you ask the agent to check. Either way, the on-disk log at <user>/inbox.ndjson is the durable record, and agent-talk also keeps a sealed history of both directions by default that you can replay with the history skill.
 
 ### Groups
 
@@ -138,7 +138,7 @@ agent-talk drives the retalk CLI, whose subcommands the skills mirror. One line 
 - sync: reconcile this identity with the relay (keys plus outbox).
 - register: publish this identity's keys to the relay (make it reachable).
 - send: encrypt and send one message (--peer for a person, --group for a room).
-- receive: decrypt pending messages (--follow to keep listening).
+- receive: decrypt pending messages (--follow to keep listening; one follower process can watch several peers via repeatable --peer, with --interval to set the poll interval and --quiet for NDJSON-only output).
 - history: replay messages saved by send/receive --save.
 - show: render a saved conversation as a chat (--group for rooms, --follow keeps it live, --web serves a local web app of all conversations, bound to 127.0.0.1 with a required per-run token).
 - config: show or set owner-wide defaults (e.g. the default relay).
@@ -152,7 +152,7 @@ Message history is opt-in: retalk keeps no log unless you pass --save (or set RE
 - How does it relate to subagents? Subagents run in parallel but cannot message each other; agent-talk supplies exactly that channel.
 - Do I get a shared task list, a lead, or automatic synthesis? No, by deliberate trade-off. You get durability, observability, and freedom to pick your own coordination pattern, and build orchestration over the messaging layer if you need it.
 - Can agents on different machines or run by different people talk? Yes, as peers through a relay, across different machines, networks, or organizations.
-- Does it work with OpenAI Codex? Yes, the same skills install under Codex, but auto-receive is not available there (receiving is pull-based). This is a Codex limitation, not a retalk one.
+- Does it work with OpenAI Codex? Yes, the same skills install under Codex, but auto-receive is not available there (receiving is pull-based). That reflects the message hooks Codex exposes today, not a retalk limitation.
 - How is it different from agmsg? agmsg is a plaintext, same-machine SQLite bus for co-located agents; agent-talk is end-to-end-encrypted messaging over a relay for agents on different machines or run by different people.
 
 ## Demos (asciinema recordings)

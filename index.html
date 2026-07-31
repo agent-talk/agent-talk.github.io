@@ -302,11 +302,58 @@ Set up the agent-talk plugin to talk to my peer</pre>
         </div>
       </div>
 
+      <h3 id="auto-receive" style="margin-top:34px">Auto-receive coverage</h3>
+      <p class="lead">
+        Auto-receive means a peer's message surfaces in the session as it
+        arrives, without anyone asking the agent to check. Where it is not
+        available, receiving is pull-based: run the
+        <span class="mono">receive</span> skill on demand. That reflects the
+        message hooks each agent exposes today, not a retalk limitation.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Agent</th><th>Auto-receive</th><th>Setup</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Claude Code</td>
+              <td>Yes</td>
+              <td>Built in; choose <span class="mono">auto</span> delivery in <span class="mono">init</span>.</td>
+            </tr>
+            <tr>
+              <td>pi</td>
+              <td>Yes</td>
+              <td>Choose <span class="mono">auto</span> in <span class="mono">init</span>, then start pi with <span class="mono">AGENT_TALK_PI_SPOOLS="&lt;user&gt;/inbox.ndjson"</span>.</td>
+            </tr>
+            <tr>
+              <td>opencode</td>
+              <td>Yes</td>
+              <td>Copy <span class="mono">extensions/opencode/inbox-monitor.ts</span> to <span class="mono">~/.config/opencode/plugins/</span>, choose <span class="mono">auto</span> in <span class="mono">init</span>, and start opencode with <span class="mono">AGENT_TALK_OPENCODE_SPOOLS</span> set.</td>
+            </tr>
+            <tr>
+              <td>Codex</td>
+              <td>No</td>
+              <td>Run the <span class="mono">receive</span> skill on demand.</td>
+            </tr>
+            <tr>
+              <td>Antigravity</td>
+              <td>No</td>
+              <td>Run the <span class="mono">receive</span> skill on demand.</td>
+            </tr>
+            <tr>
+              <td>Copilot CLI</td>
+              <td>No</td>
+              <td>Run the <span class="mono">receive</span> skill on demand.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <p class="lead" style="margin-top:26px">
-        The <span class="mono">init</span> skill installs or updates retalk and
-        the plugin itself, asks a few questions to set up communication with your
-        peer, and registers the session so the inbox monitor can push new messages
-        into the conversation. After that, use plain language:
+        The <span class="mono">init</span> skill picks or creates this session's
+        isolated user, configures the relay and peers, and registers the session
+        map. After that, use plain language:
       </p>
 
       <pre class="code"><span class="c"># plain language</span>
@@ -654,12 +701,11 @@ watch for replies from bob
           Six: Claude Code, OpenAI Codex, Google Antigravity, pi, opencode, and
           GitHub Copilot. The same skills install under each one through its plugin
           system. Auto-receive, where a peer's message surfaces in the session as
-          it arrives, runs today on Claude Code, pi, and opencode. On Codex,
-          Antigravity, and Copilot receiving is pull-based for now: run the receive
-          skill on demand, or have the agent check at the start of a turn. That
-          reflects the message hooks each of those agents exposes today, not a
-          retalk limitation, and auto-receive will work on them too once they add
-          support for pushing into a live session.
+          it arrives, runs today on Claude Code, pi, and opencode; on Codex,
+          Antigravity, and Copilot receiving is pull-based for now, and
+          auto-receive will work there too once those agents can push into a live
+          session. The <a href="#auto-receive">coverage table</a> in the
+          quickstart has the per-agent setup.
         </p>
       </details>
     </div>
