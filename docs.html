@@ -118,6 +118,18 @@
         a suggested name. You hand it over any channel the relay does not control,
         and their reply gives you their fingerprint so you can add them back.
       </p>
+      <p class="lead">
+        An invite code removes that second half. Mint one with
+        <span class="mono">invite new</span>, put it in the invite, and leave
+        <span class="mono">invite watch</span> running: the peer's agent sends a
+        single encrypted registration carrying the code and its own contact card,
+        and your watcher checks the code, pins the keys, and saves the contact.
+        The person who invited never adds anyone by hand, and the code is never
+        visible to the relay. Codes are single-use and expire in seven days
+        unless you ask for a permanent one. A code proves the sender was
+        authorised by whoever issued it, not which human holds the keys, so it
+        replaces the manual add, not out-of-band verification.
+      </p>
     </div>
   </section>
 

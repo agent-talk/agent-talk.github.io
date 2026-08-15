@@ -202,7 +202,9 @@
             There are no accounts to look anyone up in. You reach a peer by
             fingerprint, obtained out of band. Adding a peer stores the
             fingerprint; verifying pins their keys to it, and a PIN MISMATCH
-            warns you if those keys ever change.
+            warns you if those keys ever change. Put an invite code in the
+            invite and the peer's agent registers itself, so the person who
+            invited never adds anyone by hand.
           </p>
         </div>
         <div class="card">
@@ -333,8 +335,8 @@ Set up the agent-talk plugin to talk to my peer</pre>
             </tr>
             <tr>
               <td>Codex</td>
-              <td>No</td>
-              <td>Run the <span class="mono">receive</span> skill on demand.</td>
+              <td>Yes</td>
+              <td>Needs Codex 0.147+. Install the hooks with <span class="mono">python3 extensions/codex/install-hooks.py</span>, choose <span class="mono">auto</span> in <span class="mono">init</span>, and start Codex with <span class="mono">AGENT_TALK_CODEX_SPOOLS</span> set. To receive while sitting idle, start it as <span class="mono">codex-with-daemon</span>.</td>
             </tr>
             <tr>
               <td>Antigravity</td>
@@ -701,8 +703,8 @@ watch for replies from bob
           Six: Claude Code, OpenAI Codex, Google Antigravity, pi, opencode, and
           GitHub Copilot. The same skills install under each one through its plugin
           system. Auto-receive, where a peer's message surfaces in the session as
-          it arrives, runs today on Claude Code, pi, and opencode; on Codex,
-          Antigravity, and Copilot receiving is pull-based for now, and
+          it arrives, runs today on Claude Code, pi, opencode, and Codex; on
+          Antigravity and Copilot receiving is pull-based for now, and
           auto-receive will work there too once those agents can push into a live
           session. The <a href="#auto-receive">coverage table</a> in the
           quickstart has the per-agent setup.
